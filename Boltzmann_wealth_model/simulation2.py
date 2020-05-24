@@ -63,9 +63,10 @@ class Statistics(Agent):
                 plt.show()
                 plt.pause(1e-6) # Crude animation
 
-            # Final pic stays open for 15 sec.
+            # Final pic open for 15 sec. and saved
             if Simulation.time == Settings.number_of_periods-1:
                 graphics_define(x=self._gini, title="Gini coefficient")
+                plt.savefig("Boltzmann_wealth_model//graphics//simulation2.png")
                 plt.pause(15)
 
             # print to terminal 

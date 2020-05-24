@@ -2,6 +2,7 @@ from dream_agent import Agent
 from enum import Enum
 import random
 import matplotlib.pyplot as plt
+import numpy as np
 
 # Events
 #---------------------------
@@ -26,13 +27,20 @@ class Person(Agent):
 
     def event_proc(self, id_event):
         if id_event == Event.UPDATE:
+            # Wealth-giving
             if self._wealth >= 1:
                 g = Simulation.grid[self._x][self._y].copy()
                 if len(g) > 1:
-                    g.remove(self)              # You don't want to give money to yourself 
+                    g.remove(self)  # You don't want to give money to yourself    
                     p = random.choice(g)        # Choose a random person
                     if random.random() < Settings.probability_give:
                         self.transfer_to(p, 1)  # Give money
+
+            # Moving
+            if random.random() < Settings.probability_move:
+                # Move to random neighbor cell in the grid
+                d_xy = random.choice([[1,1],[1,0],[1,-1],[0,-1],[-1,-1],[-1,0],[-1,1],[0,1]])
+                self._x, self._y = Simulation.grid_move(self._x + d_xy[0], self._y + d_xy[1], self)
 
     def transfer_to(self, other, value):                     
         self._wealth -= value
@@ -57,25 +65,40 @@ class Statistics(Agent):
     def event_proc(self, id_event):
         if id_event == Event.START:
             graphics_init() # Initialize graphics
-            self._gini = [] # Initialize time series data           
+            
+            self._personRandom = None # A random person to follow
+            
+            # Initialize time series data
+            self._gini = []   
+            self._wealthRandom = []         
 
         elif id_event == Event.PERIOD_START:
+            # If _personRandom is not defines, choose a random person
+            if self._personRandom==None: self._personRandom = Simulation.population.get_random_agent()
+
             # Collect data
             agent_wealths = [p.wealth for p in Simulation.population] 
-            
+            self._wealthRandom.append(self._personRandom.wealth)
+
+            n_agents = np.zeros((Settings.grid_size_x, Settings.grid_size_y))
+            for x in range(Settings.grid_size_x):
+                for y in range(Settings.grid_size_y):
+                    n_agents[x][y] = len(Simulation.grid[x][y])
+
             # calculate gini
             gini = compute_gini(agent_wealths)
             self._gini.append(gini) # Add to time series
 
             # Show real time graphics (every graphics_periods_per_pic periode)
             if Simulation.time % Settings.graphics_periods_per_pic==0:
-                graphics_define(x1=self._gini, x2=agent_wealths, title="Gini coefficient [t: {}]".format(Simulation.time))
+                graphics_define(x1=self._gini, x2=agent_wealths, x3=self._wealthRandom, x4=n_agents, title="Gini coefficient [t: {}]".format(Simulation.time))
                 plt.show()
                 plt.pause(1e-6) # Crude animation
 
-            # Final pic stays open for 15 sec.
+            # Final pic open for 15 sec. and saved
             if Simulation.time == Settings.number_of_periods-1:
-                graphics_define(x1=self._gini, x2=agent_wealths, title="Gini coefficient")
+                graphics_define(x1=self._gini, x2=agent_wealths, x3=self._wealthRandom, x4=n_agents, title="Gini coefficient")
+                plt.savefig("Boltzmann_wealth_model//graphics//simulation3.png")
                 plt.pause(15)
 
 def compute_gini(wealths): # How to calculate gini
@@ -86,26 +109,40 @@ def compute_gini(wealths): # How to calculate gini
 
 def graphics_init():
     plt.ion()   # Necessary to get animation effect 
-    plt.figure(figsize=[13,5])
+    plt.figure(figsize=[15,8])
 
-def graphics_define(x1, x2, title=""):
+def graphics_define(x1, x2, x3, x4, title=""):
     plt.clf()
     
-    plt.subplot(1,2,1)
+    plt.subplot(2,2,1)
     plt.title(title)
     plt.plot(x1)
-    plt.xlabel("Periods")
+    #plt.xlabel("Periods")
     plt.ylabel("Gini")
     plt.xlim(0, Settings.number_of_periods) 
     plt.ylim(0.0, 1.0) 
 
-    plt.subplot(1,2,2)
-    plt.title("Histogram")
-    plt.hist(x2)
-    plt.xlim(0, 6) 
+    plt.subplot(2,2,2)
+    plt.title("Histogram of wealth")
+    plt.hist(x2, bins = range(10), align='left', rwidth=0.3)
+    #plt.xlabel("Wealth")
+    plt.ylabel("Number")
+    plt.xlim(-0.2, 9) 
+    #plt.ylim(0.0, 1.0) 
 
+    plt.subplot(2,2,3)
+    plt.title("Random persons wealth")
+    plt.plot(x3)
+    plt.xlabel("Periods")
+    plt.ylabel("Wealth")
+    plt.xlim(0, Settings.number_of_periods) 
+    #plt.ylim(0.0, 1.0) 
 
-
+    plt.subplot(2,2,4)
+    plt.title("Grid")
+    plt.imshow(x4, interpolation='nearest')
+    plt.colorbar()
+    
 # The Simulation object
 #---------------------------
 class Simulation(Agent):
@@ -157,6 +194,7 @@ class Simulation(Agent):
 
     @staticmethod
     def grid_append(x , y, p):
+        # Make sure that x, y is inside the grid
         x_new = x % Settings.grid_size_x
         y_new = y % Settings.grid_size_y
 
@@ -166,6 +204,7 @@ class Simulation(Agent):
 
     @staticmethod
     def grid_move(x , y, p):
+        # Make sure that x, y is inside the grid
         x_new = x % Settings.grid_size_x
         y_new = y % Settings.grid_size_y
 
@@ -177,9 +216,10 @@ class Simulation(Agent):
 
 # We can now run the model
 #--------------------------
-Settings.number_of_agents = 500
+Settings.number_of_agents = 250
 Settings.number_of_periods = 500
-Settings.probability_give = 0.5
+Settings.probability_give = 0.1
+Settings.probability_move = 0.5
 Settings.graphics_periods_per_pic = 10
 
 Settings.grid_size_x = 10
