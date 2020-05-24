@@ -106,7 +106,7 @@ class Agent:
             n {int} -- Number of agents to return. If the number of agents is less than n, all agents are returned.  (default: {1})
 
         Returns:
-            Agent -- A random agent. Returns None if no children
+            Agent -- A random agent or a list of agents. Returns None if no children
         """
         # If no children
         if self._first == None:
