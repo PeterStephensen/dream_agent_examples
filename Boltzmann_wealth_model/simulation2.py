@@ -67,7 +67,6 @@ class Statistics(Agent):
             if Simulation.time == Settings.number_of_periods-1:
                 graphics_define(x=self._gini, title="Gini coefficient")
                 plt.pause(15)
-                #plt.show(block=True)
 
             # print to terminal 
             print("{}\t{:.4f}".format(Simulation.time, gini))

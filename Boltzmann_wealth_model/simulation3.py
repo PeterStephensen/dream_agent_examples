@@ -27,7 +27,7 @@ class Person(Agent):
     def event_proc(self, id_event):
         if id_event == Event.UPDATE:
             if self._wealth >= 1:
-                g = Simulation.grid[self._x][self._y]
+                g = Simulation.grid[self._x][self._y].copy()
                 if len(g) > 1:
                     g.remove(self)              # You don't want to give money to yourself 
                     p = random.choice(g)        # Choose a random person
@@ -50,7 +50,6 @@ class Person(Agent):
     def y(self):
         return self._y
 
-
 # The Statistics object
 #---------------------------
 class Statistics(Agent):
@@ -70,15 +69,14 @@ class Statistics(Agent):
 
             # Show real time graphics (every graphics_periods_per_pic periode)
             if Simulation.time % Settings.graphics_periods_per_pic==0:
-                graphics_define(x=self._gini, title="Gini coefficient [t: {}]".format(Simulation.time))
+                graphics_define(x1=self._gini, x2=agent_wealths, title="Gini coefficient [t: {}]".format(Simulation.time))
                 plt.show()
                 plt.pause(1e-6) # Crude animation
 
             # Final pic stays open for 15 sec.
             if Simulation.time == Settings.number_of_periods-1:
-                graphics_define(x=self._gini, title="Gini coefficient")
+                graphics_define(x1=self._gini, x2=agent_wealths, title="Gini coefficient")
                 plt.pause(15)
-                #plt.show(block=True)
 
 def compute_gini(wealths): # How to calculate gini
     N = len(wealths)
@@ -88,16 +86,24 @@ def compute_gini(wealths): # How to calculate gini
 
 def graphics_init():
     plt.ion()   # Necessary to get animation effect 
-    plt.figure(figsize=[10,5])
+    plt.figure(figsize=[13,5])
 
-def graphics_define(x, title=""):
+def graphics_define(x1, x2, title=""):
     plt.clf()
+    
+    plt.subplot(1,2,1)
     plt.title(title)
-    plt.plot(x)
+    plt.plot(x1)
     plt.xlabel("Periods")
     plt.ylabel("Gini")
     plt.xlim(0, Settings.number_of_periods) 
     plt.ylim(0.0, 1.0) 
+
+    plt.subplot(1,2,2)
+    plt.title("Histogram")
+    plt.hist(x2)
+    plt.xlim(0, 6) 
+
 
 
 # The Simulation object
@@ -173,7 +179,7 @@ class Simulation(Agent):
 #--------------------------
 Settings.number_of_agents = 500
 Settings.number_of_periods = 500
-Settings.probability_give = 0.01
+Settings.probability_give = 0.5
 Settings.graphics_periods_per_pic = 10
 
 Settings.grid_size_x = 10
