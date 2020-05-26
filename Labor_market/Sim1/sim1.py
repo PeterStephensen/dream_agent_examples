@@ -89,6 +89,9 @@ class Workplace(Agent):
     def communicate(self, e_communication, worker):
         return ECommunication.OK
 
+    def add_worker(self):
+        self._L=self._L+1
+
     @property
     def gamma(self):
         return self._gamma
@@ -96,10 +99,6 @@ class Workplace(Agent):
     @property
     def L(self):
         return self._L
-
-    @L.setter
-    def L(self, value):
-        self._L = value
 
 
 # The Statistics object
@@ -190,14 +189,12 @@ class Simulation(Agent):
         # Allocating workplaces and workers       
         for _ in range(Settings.number_of_workplaces):
             wp = Workplace(Simulation.workplaces, random.random()*Settings.workplace_max_gamma)   # Start with random gamma
-            L=0
             for _ in range(Settings.number_of_workers_per_workplace):
                 if random.random() < Settings.worker_probability_job_init:
                     Worker(Simulation.workers, random.random()*Settings.worker_max_S, wp)    # Job. Start with random S
-                    L=L+1
+                    wp.add_worker()
                 else:
                     Worker(Simulation.workers, random.random()*Settings.worker_max_S, None)  # No job. Start with random S
-            wp.L = L
 
         # Initializing macro variables
         Simulation.wage = 1
