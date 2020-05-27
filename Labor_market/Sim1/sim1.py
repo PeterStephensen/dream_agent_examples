@@ -1,16 +1,19 @@
-from dream_agent import Agent
 from enum import Enum
 import random
 import matplotlib.pyplot as plt
-import numpy as np
+import math
+
+from dream_agent import Agent
+from settings import Settings
 
 # Events
 #---------------------------
 class Event(Enum):
     START = 0         # The model starts
     STOP = 1          # The model stops
-    PERIOD_START = 2  # The start of a period
-    UPDATE = 3        # Stuff that happens in the period
+    PERIOD_START = 2  # The start of a period. Statistics register data
+    PERIOD_STOP = 4   # The start of a period. Agents calculate utility and profits
+    UPDATE = 4        # Stuff that happens in the period
 
 # Communication
 #---------------------------
@@ -21,9 +24,6 @@ class ECommunication(Enum):
     NO = 3         
     OK = 4
 
-# The Settings object
-#---------------------------
-class Settings: pass # Defined later
 
 # The Workers object
 #---------------------------
@@ -32,8 +32,8 @@ class Worker(Agent):
     def __init__(self, parent=None, S=0, workplace=None):
         super().__init__(parent)
         self._S = S
-        self._n = int(np.floor(S))         # Number of jobs to apply for
-        self._prob = S - np.floor(S)  # Probability of extra job application
+        self._n = int(math.floor(S))         # Number of jobs to apply for
+        self._prob = S - math.floor(S)  # Probability of extra job application
         self._workplace = workplace
         self._utility=0
         self._utility_discounted=0
@@ -51,8 +51,8 @@ class Worker(Agent):
                 if random.random() < Settings.worker_delta:
                     self._workplace.communicate(ECommunication.I_QUIT, self)
                     self._workplace = None                                            
-           
-            
+
+        if id_event == Event.PERIOD_STOP:
             # Calculate utility
             if self._workplace==None: 
                 self._utility = Simulation.benefits - Settings.worker_disutility * self._S  # If not working
@@ -81,13 +81,48 @@ class Workplace(Agent):
         super().__init__(parent)
         self._gamma = gamma
         self._L = L
+        self._V = 0
+        self._N_hat = 0
+        self._hired = 0
+        self._theta = 1
+        self._profit=0
+        self._profit_discounted=0
+
+        # Calibration af A
+        self._A = Settings.number_of_workers_per_workplace * Settings.worker_probability_job_init
 
     def event_proc(self, id_event):
-        if id_event == Event.UPDATE:
-            zz=22
+        if id_event == Event.PERIOD_START:
+            L_hat = self._A * (self._theta /(Simulation.wage / Simulation.price)) ** (1/(1-Settings.workplace_alpha))
+            N_hat = L_hat - (1 - Settings.worker_delta) * self._L
+            self._V = self._gamma * N_hat
+            self._hired=0
+
+#        elif id_event == Event.UPDATE:
+
+        elif id_event == Event.PERIOD_STOP:
+            Y = self._A ** (1-Settings.workplace_alpha) * (self._theta / Settings.workplace_alpha) * self._L ** Settings.workplace_alpha
+            self._profit = Simulation.price * Y - Simulation.wage * self._L - Settings.workplace_kappa * self._V
+            self._profit_discounted = Settings.workplace_beta * self._profit_discounted + self._profit
+
+            self._theta = math.exp(math.log(self._theta) + random.gauss(0, Settings.workplace_sigma))
+            if Simulation.time == 50:
+                zz=22
 
     def communicate(self, e_communication, worker):
-        return ECommunication.OK
+        if e_communication==ECommunication.DO_YOU_HAVE_A_JOB:
+            if self._hired < self._V:
+                self._hired = self._hired + 1
+                self._L = self._L + 1 
+                return ECommunication.YES
+            else:
+                return ECommunication.NO
+
+        elif e_communication==ECommunication.I_QUIT:
+            self._hired = self._hired - 1
+            self._L = self._L - 1 
+            return ECommunication.OK
+
 
     def add_worker(self):
         self._L=self._L+1
@@ -107,53 +142,83 @@ class Statistics(Agent):
 
     def event_proc(self, id_event):
         if id_event == Event.START:
-            zzz=222
-            #graphics_init() # Initialize graphics
-            
+            graphics_init() # Initialize graphics
+            self._L_tot = []          
 
         elif id_event == Event.PERIOD_START:
             # Collect data
+            L = [wp.L for wp in Simulation.workplaces] 
+            gamma = [wp.gamma for wp in Simulation.workplaces] 
+            profit_discounted = [wp._profit_discounted for wp in Simulation.workplaces] 
+            S = [w.S for w in Simulation.workers] 
+            utility_discounted = [w.utility_discounted for w in Simulation.workers] 
 
-            # calculate gini
+            self._L_tot.append(sum(L))
 
             # Show real time graphics (every graphics_periods_per_pic periode)
-            # if Simulation.time % Settings.graphics_periods_per_pic==0:
-            #     graphics_define(x1=self._gini, x2=agent_wealths, x3=self._wealthRandom, x4=n_agents, title="Gini coefficient [t: {}]".format(Simulation.time))
-            #     plt.show()
-            #     plt.pause(1e-6) # Crude animation
+            if Simulation.time % Settings.graphics_periods_per_pic==0:
+                plt.clf()
+                plot1(self._L_tot)
+                plot2(gamma, profit_discounted)
+                plot3(S, utility_discounted)
+                plt.show()
+                plt.pause(1e-6) # Crude animation
 
             # Final pic open for 15 sec. and saved
-            # if Simulation.time == Settings.number_of_periods-1:
-            #     graphics_define(x1=self._gini, x2=agent_wealths, x3=self._wealthRandom, x4=n_agents, title="Gini coefficient")
-            #     plt.savefig("Boltzmann_wealth_model//graphics//simulation3.png")
-            #     plt.pause(15)
+            if Simulation.time == Settings.number_of_periods-1:
+                plt.clf()
+                plot1(self._L_tot)
+                plot2(gamma, profit_discounted)
+                plot3(S, utility_discounted)
+                plt.savefig("Labor_market//Sim1//graphics//sim1.png")
+                plt.pause(15)
 
             # print to terminal 
-            print("{}".format(Simulation.time))
+            print("{}\t{}".format(Simulation.time, sum(L)))
 
 
 def graphics_init():
     plt.ion()   # Necessary to get animation effect 
     plt.figure(figsize=[15,8])
 
-def graphics_define(x1, x2, x3, x4, title=""):
-    plt.clf()
+def plot1(x):
+    plt.subplot(2,2,1)
+    #plt.title(title)
+    plt.plot(x)
+    plt.xlabel("Periods")
+    plt.ylabel("Total employment")
+    plt.xlim(0, Settings.number_of_periods) 
     
-    # plt.subplot(2,2,1)
-    # plt.title(title)
-    # plt.plot(x1)
-    # #plt.xlabel("Periods")
-    # plt.ylabel("Gini")
-    # plt.xlim(0, Settings.number_of_periods) 
-    # plt.ylim(0.0, 1.0) 
+    n = Settings.number_of_workplaces*Settings.number_of_workers_per_workplace
+    plt.ylim(0.5*n, 1.1*n) 
 
-    # plt.subplot(2,2,2)
-    # plt.title("Histogram of wealth")
-    # plt.hist(x2, bins = range(10), align='left', rwidth=0.3)
-    # #plt.xlabel("Wealth")
-    # plt.ylabel("Number")
-    # plt.xlim(-0.2, 9) 
-    # #plt.ylim(0.0, 1.0) 
+def plot2(x,y):
+    plt.subplot(2,2,2)
+    #plt.title(title)
+    plt.plot(x,y, 'o', ms=1)
+    plt.xlabel("gamma")
+    plt.ylabel("Discounted profits")
+    # plt.xlim(0, Settings.number_of_periods) 
+    plt.ylim(-250000, 10000) 
+
+
+def plot3(x,y):
+    plt.subplot(2,2,3)
+    #plt.title(title)
+    plt.plot(x,y, 'o', ms=1)
+    plt.xlabel("S")
+    plt.ylabel("Discounted utility")
+    # plt.xlim(0, Settings.number_of_periods) 
+    # plt.ylim(-250000, 10000) 
+
+
+    #    plt.subplot(1,2,2)
+        # plt.title("Histogram of wealth")
+        #plt.plot(x2, bins = range(10), align='left', rwidth=0.3)
+        #plt.xlabel("Wealth")
+        #plt.ylabel("Number")
+        #plt.xlim(-0.2, 9) 
+        #plt.ylim(0.0, 1.0) 
 
     # plt.subplot(2,2,3)
     # plt.title("Random persons wealth")
@@ -187,14 +252,18 @@ class Simulation(Agent):
         Simulation.workplaces = Agent(self)
 
         # Allocating workplaces and workers       
+        gamma_min = Settings.workplace_min_gamma
+        d_gamma = Settings.workplace_max_gamma - gamma_min
+        S_min = Settings.worker_min_S
+        d_S = Settings.worker_max_S - S_min
         for _ in range(Settings.number_of_workplaces):
-            wp = Workplace(Simulation.workplaces, random.random()*Settings.workplace_max_gamma)   # Start with random gamma
+            wp = Workplace(Simulation.workplaces, gamma_min + random.random()*d_gamma)   # Start with random gamma
             for _ in range(Settings.number_of_workers_per_workplace):
                 if random.random() < Settings.worker_probability_job_init:
-                    Worker(Simulation.workers, random.random()*Settings.worker_max_S, wp)    # Job. Start with random S
+                    Worker(Simulation.workers, S_min + random.random()*d_S, wp)    # Job. Start with random S
                     wp.add_worker()
                 else:
-                    Worker(Simulation.workers, random.random()*Settings.worker_max_S, None)  # No job. Start with random S
+                    Worker(Simulation.workers, S_min + random.random()**d_S, None)  # No job. Start with random S
 
         # Initializing macro variables
         Simulation.wage = 1
@@ -228,24 +297,6 @@ class Simulation(Agent):
 
 # We can now run the model
 #--------------------------
-Settings.number_of_workplaces = 100
-Settings.number_of_workers_per_workplace = 10
-
-
-Settings.worker_max_S = 10 # maximum number of job search
-Settings.worker_probability_job_init = 0.9 # Probability of having job when the model starts
-Settings.worker_beta = 0.95 # Discounting factor
-Settings.worker_disutility = 0.1
-Settings.worker_delta = 0.05 # Probability of quitting job
-Settings.workplace_max_gamma = 1.0 # maximum gamma
-Settings.workplace_beta = 0.95 # Discounting factor
-
-
-Settings.number_of_periods = 100
-
-Settings.graphics_periods_per_pic = 10
-
-
 Simulation()
 
 
