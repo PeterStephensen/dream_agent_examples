@@ -1,30 +1,11 @@
-from enum import Enum
 import random
 import matplotlib.pyplot as plt
 import math
 
 from dream_agent import Agent
-from settings import Settings
+from enums import *
+from settings import *
 from plots import *
-
-# Events
-#---------------------------
-class Event(Enum):
-    START = 0         # The model starts
-    STOP = 1          # The model stops
-    PERIOD_START = 2  # The start of a period. Statistics register data
-    PERIOD_STOP = 4   # The start of a period. Agents calculate utility and profits
-    UPDATE = 4        # Stuff that happens in the period
-
-# Communication
-#---------------------------
-class ECommunication(Enum):
-    DO_YOU_HAVE_A_JOB = 0 
-    I_QUIT = 1
-    YES = 2         
-    NO = 3         
-    OK = 4
-
 
 # The Workers object
 #---------------------------
@@ -38,13 +19,15 @@ class Worker(Agent):
         self._workplace = workplace
         self._utility=0
         self._utility_discounted=0
+        self._unemployment_duration=0
 
     def event_proc(self, id_event):
         if id_event == Event.UPDATE:
             if self._workplace==None: # If no job
                 n = self._n
-                if random.random() < self._prob: n=n+1
-                for wp in Simulation.workplaces.get_random_agent(n=n):                        
+                if random.random() < self._prob: n += 1
+
+                for wp in Simulation.workplaces.get_random_agent(n=n, always_list=True):                        
                     if wp.communicate(ECommunication.DO_YOU_HAVE_A_JOB, self)==ECommunication.YES:
                         self._workplace = wp
                         break
@@ -53,14 +36,21 @@ class Worker(Agent):
                     self._workplace.communicate(ECommunication.I_QUIT, self)
                     self._workplace = None                                            
 
+            if self._workplace==None:
+                self._unemployment_duration += 1
+            else:
+                self._unemployment_duration = 0
+
+
         if id_event == Event.PERIOD_STOP:
+
             # Calculate utility
             if self._workplace==None: 
                 self._utility = Simulation.benefits - Settings.worker_disutility * self._S  # If not working
             else:
                 self._utility = Simulation.wage                             
 
-            self._utility_discounted = Settings.worker_beta * self._utility_discounted + self._utility 
+            self._utility_discounted = Settings.worker_beta * self._utility_discounted + self._utility
 
     @property
     def S(self):
@@ -73,6 +63,11 @@ class Worker(Agent):
     @property
     def utility_discounted(self):
         return self._utility_discounted
+
+    @property
+    def unemployment_duration(self):
+        return self._unemployment_duration
+
 
 # The Workplace object
 #---------------------------
@@ -138,6 +133,10 @@ class Workplace(Agent):
     def L(self):
         return self._L
 
+    @property
+    def profit_discounted(self):
+        return self._profit_discounted
+
 
 # The Statistics object
 #---------------------------
@@ -149,36 +148,35 @@ class Statistics(Agent):
             self._L_tot = []          
 
         elif id_event == Event.PERIOD_START:
-            # Collect data
+            # Collect time series data
             L = [wp.L for wp in Simulation.workplaces] 
-            gamma = [wp.gamma for wp in Simulation.workplaces] 
-            profit_discounted = [wp._profit_discounted for wp in Simulation.workplaces] 
-            S = [w.S for w in Simulation.workers] 
-            utility_discounted = [w.utility_discounted for w in Simulation.workers] 
-
             self._L_tot.append(sum(L))
 
             # Show real time graphics (every graphics_periods_per_pic periode)
-            if Simulation.time % Settings.graphics_periods_per_pic==0:
+            show_pic     = Simulation.time % Settings.graphics_periods_per_pic==0
+            last_periode = Simulation.time == Settings.number_of_periods-1            
+            if show_pic or last_periode:
+                # Collect data for cross section
+                gamma = [wp.gamma for wp in Simulation.workplaces] 
+                profit_discounted = [wp.profit_discounted for wp in Simulation.workplaces] 
+                S = [w.S for w in Simulation.workers] 
+                utility_discounted = [w.utility_discounted for w in Simulation.workers] 
+                unemployment_duration = [w.unemployment_duration for w in Simulation.workers] 
+                
                 plt.clf()
                 plot1(self._L_tot)
-                # plot2(gamma, profit_discounted)
-                plot2(gamma, L)
+                plot2(gamma, profit_discounted)
                 plot3(S, utility_discounted)
                 plot4(L)
+                plot5(unemployment_duration)
                 plt.show()
-                plt.pause(1e-6) # Crude animation
 
-            # Final pic open for 15 sec. and saved
-            if Simulation.time == Settings.number_of_periods-1:
-                plt.clf()
-                plot1(self._L_tot)
-                # plot2(gamma, profit_discounted)
-                plot2(gamma, L)
-                plot3(S, utility_discounted)
-                plot4(L)
-                plt.savefig("Labor_market//Sim1//graphics//sim1.png")
-                plt.pause(15)
+                if show_pic: 
+                    plt.pause(1e-6) # Crude animation
+
+                if last_periode:    # Final pic open for 15 sec. and saved
+                    plt.savefig("Labor_market//Sim1//graphics//sim1.png")
+                    plt.pause(15)
 
             # print to terminal 
             print("{}\t{}".format(Simulation.time, sum(L)))
