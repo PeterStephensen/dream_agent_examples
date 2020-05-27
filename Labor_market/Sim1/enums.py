@@ -5,8 +5,8 @@ from enum import Enum
 class Event(Enum):
     START = 0         # The model starts
     STOP = 1          # The model stops
-    PERIOD_START = 2  # The start of a period. Statistics register data
-    PERIOD_STOP = 4   # The start of a period. Agents calculate utility and profits
+    PERIOD_START = 2  # The start of a period. Statistics makes statistics
+    PERIOD_STOP = 3   # The end of a period. Agents calculate utility and profits
     UPDATE = 4        # Stuff that happens in the period
 
 # Communication
