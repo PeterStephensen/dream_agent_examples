@@ -5,6 +5,7 @@ import math
 
 from dream_agent import Agent
 from settings import Settings
+from plots import *
 
 # Events
 #---------------------------
@@ -106,7 +107,9 @@ class Workplace(Agent):
             self._profit_discounted = Settings.workplace_beta * self._profit_discounted + self._profit
 
             self._theta = math.exp(math.log(self._theta) + random.gauss(0, Settings.workplace_sigma))
-            if Simulation.time == 50:
+            if (Simulation.time > 50) & (self._profit_discounted<-10000):
+                L_hat = self._A * (self._theta /(Simulation.wage / Simulation.price)) ** (1/(1-Settings.workplace_alpha))
+                N_hat = L_hat - (1 - Settings.worker_delta) * self._L
                 zz=22
 
     def communicate(self, e_communication, worker):
@@ -159,8 +162,10 @@ class Statistics(Agent):
             if Simulation.time % Settings.graphics_periods_per_pic==0:
                 plt.clf()
                 plot1(self._L_tot)
-                plot2(gamma, profit_discounted)
+                # plot2(gamma, profit_discounted)
+                plot2(gamma, L)
                 plot3(S, utility_discounted)
+                plot4(L)
                 plt.show()
                 plt.pause(1e-6) # Crude animation
 
@@ -168,70 +173,15 @@ class Statistics(Agent):
             if Simulation.time == Settings.number_of_periods-1:
                 plt.clf()
                 plot1(self._L_tot)
-                plot2(gamma, profit_discounted)
+                # plot2(gamma, profit_discounted)
+                plot2(gamma, L)
                 plot3(S, utility_discounted)
+                plot4(L)
                 plt.savefig("Labor_market//Sim1//graphics//sim1.png")
                 plt.pause(15)
 
             # print to terminal 
             print("{}\t{}".format(Simulation.time, sum(L)))
-
-
-def graphics_init():
-    plt.ion()   # Necessary to get animation effect 
-    plt.figure(figsize=[15,8])
-
-def plot1(x):
-    plt.subplot(2,2,1)
-    #plt.title(title)
-    plt.plot(x)
-    plt.xlabel("Periods")
-    plt.ylabel("Total employment")
-    plt.xlim(0, Settings.number_of_periods) 
-    
-    n = Settings.number_of_workplaces*Settings.number_of_workers_per_workplace
-    plt.ylim(0.5*n, 1.1*n) 
-
-def plot2(x,y):
-    plt.subplot(2,2,2)
-    #plt.title(title)
-    plt.plot(x,y, 'o', ms=1)
-    plt.xlabel("gamma")
-    plt.ylabel("Discounted profits")
-    # plt.xlim(0, Settings.number_of_periods) 
-    plt.ylim(-250000, 10000) 
-
-
-def plot3(x,y):
-    plt.subplot(2,2,3)
-    #plt.title(title)
-    plt.plot(x,y, 'o', ms=1)
-    plt.xlabel("S")
-    plt.ylabel("Discounted utility")
-    # plt.xlim(0, Settings.number_of_periods) 
-    # plt.ylim(-250000, 10000) 
-
-
-    #    plt.subplot(1,2,2)
-        # plt.title("Histogram of wealth")
-        #plt.plot(x2, bins = range(10), align='left', rwidth=0.3)
-        #plt.xlabel("Wealth")
-        #plt.ylabel("Number")
-        #plt.xlim(-0.2, 9) 
-        #plt.ylim(0.0, 1.0) 
-
-    # plt.subplot(2,2,3)
-    # plt.title("Random persons wealth")
-    # plt.plot(x3)
-    # plt.xlabel("Periods")
-    # plt.ylabel("Wealth")
-    # plt.xlim(0, Settings.number_of_periods) 
-    # #plt.ylim(0.0, 1.0) 
-
-    # plt.subplot(2,2,4)
-    # plt.title("Grid")
-    # plt.imshow(x4, interpolation='nearest')
-    # plt.colorbar()
 
 
 # The Simulation object
@@ -288,6 +238,11 @@ class Simulation(Agent):
 
             # Stop the simulation
             self.event_proc(Event.STOP)
+        
+        elif id_event == Event.UPDATE:
+            # if Simulation.time == 100:       # Shock to the price level
+            #     Simulation.price = 0.5
+            super().event_proc(id_event)
 
         else:
             # All other events are send to defendants
