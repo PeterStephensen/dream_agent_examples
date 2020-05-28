@@ -115,6 +115,9 @@ class Agent:
         if self._random_agent == None:
             self._random_agent = self._first
 
+        if self._random_agent == self._first:
+            self.randomize_agents()            
+
         nn = n  #0.3
         if n > self._count:
             nn = self._count
@@ -148,7 +151,7 @@ class Agent:
         if ls==None:
             return None
 
-        if (len(ls) == 1):
+        if len(ls) == 1:
             return ls[0]
         else:
             return ls
