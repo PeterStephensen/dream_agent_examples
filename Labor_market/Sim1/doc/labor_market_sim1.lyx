@@ -106,51 +106,80 @@ Arbejdere
 \end_layout
 
 \begin_layout Standard
-Udbyder 1 enhed arbejdskraft.
- Hvis arbejdsløs søges arbejde.
- Arbejderen modtager lønnen 
-\begin_inset Formula $w_{t}.$
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-Hvis beskæftiget er nytten
+Arbejderen har den bagudskuende nyttefunktionen:
 \begin_inset Formula 
 \[
-U_{it}^{\text{Emp}}=w_{t}
-\]
-
-\end_inset
-
-En beskæftiget arbejder forlader sin arbejdsplads med en eksogen sandsynlighed
- 
-\begin_inset Formula $\delta.$
-\end_inset
-
- 
-\end_layout
-
-\begin_layout Standard
-Hvis ikke-beskæftiget er nytten
-\begin_inset Formula 
-\[
-U_{it}^{\text{Unemp}}=b-\eta S_{i}
+U_{t}=\sum_{-\infty}^{t}\frac{u_{s}^{1-\rho}}{1-\rho}\beta^{1+t-s}
 \]
 
 \end_inset
 
 hvor 
-\begin_inset Formula $S_{i}$
+\begin_inset Formula $u_{s}$
 \end_inset
 
- er antallet af søgte stillinger i hver periode og 
+ er nytten i priode 
+\begin_inset Formula $s$
+\end_inset
+
+.
+ Denne nyttefunktion minder om den fremadskuende nyttefunktion der er stanard
+ i megen nyere makro-teori.
+\end_layout
+
+\begin_layout Standard
+Bemærk at
+\begin_inset Formula 
+\[
+U_{t}=\beta U_{t-1}+\frac{u_{t}^{1-\rho}}{1-\rho}.
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Det er denne form vi anvender i simulationerne.
+\end_layout
+
+\begin_layout Standard
+Arbejderen har på tidspunkt 
+\begin_inset Formula $t$
+\end_inset
+
+ nyttefunktionen
+\begin_inset Formula 
+\begin{align*}
+u_{t} & =\begin{cases}
+w_{t} & \text{hvis beskæftiget}\\
+b\,e^{-\eta S_{t}} & \text{hvis ikke beskæftiget}
+\end{cases}\\
+\end{align*}
+
+\end_inset
+
+hvor 
+\begin_inset Formula $w_{t}$
+\end_inset
+
+ er lønnen, 
 \begin_inset Formula $b$
 \end_inset
 
- er understøttelsen.
- Arbejderen søger arbejde i 
+ er arbejdsløshedsunderstøttelse og 
+\begin_inset Formula $S_{t}$
+\end_inset
+
+ er antal søgte stillinger i periode 
+\begin_inset Formula $t.$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Arbejderen søger arbejde i 
 \begin_inset Formula $S_{i}$
 \end_inset
 
@@ -182,7 +211,7 @@ te arbejdsplads har
  ansatte og producerer
 \begin_inset Formula 
 \[
-Y_{jt}=\frac{\theta_{jt}}{\alpha}L_{jt}^{\alpha},\,\alpha<1
+Y_{jt}=A_{j}^{1-\alpha}\theta_{jt}\frac{1}{\alpha}L_{jt}^{\alpha},\,\alpha<1
 \]
 
 \end_inset
@@ -227,7 +256,7 @@ Hvis det var gratis at slå stillinger op ville den optimale beskæftigelse
  maksimere
 \begin_inset Formula 
 \[
-\hat{\pi}_{jt}=p_{t}\frac{\theta_{jt}}{\alpha}L_{jt}^{\alpha}-w_{t}L_{jt}
+\hat{\pi}_{jt}=p_{t}A_{j}^{1-\alpha}\theta_{jt}\frac{1}{\alpha}L_{jt}^{\alpha}-w_{t}L_{jt}
 \]
 
 \end_inset
@@ -235,7 +264,7 @@ Hvis det var gratis at slå stillinger op ville den optimale beskæftigelse
 således at
 \begin_inset Formula 
 \begin{equation}
-\hat{L}_{jt}=\left(\frac{\theta_{jt}}{w_{t}/p_{t}}\right)^{\frac{1}{1-\alpha}}\label{eq:Lhat}
+\hat{L}_{jt}=A_{j}\left(\frac{\theta_{jt}}{w_{t}/p_{t}}\right)^{\frac{1}{1-\alpha}}\label{eq:Lhat}
 \end{equation}
 
 \end_inset
@@ -266,7 +295,7 @@ adser.
  følger en random-walk:
 \begin_inset Formula 
 \[
-\phi_{jt}=\phi_{j,t-1}+\epsilon_{jt}
+log\left(\phi_{jt}\right)=log\left(\phi_{j,t-1}\right)+\epsilon_{jt}
 \]
 
 \end_inset

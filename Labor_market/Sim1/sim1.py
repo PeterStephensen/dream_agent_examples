@@ -27,7 +27,7 @@ class Worker(Agent):
                 n = self._n
                 if random.random() < self._prob: n += 1
 
-                for wp in Simulation.workplaces.get_random_agent(n=n, always_list=True):                        
+                for wp in Simulation.workplaces.get_random_agents(n=n):                        
                     if wp.communicate(ECommunication.DO_YOU_HAVE_A_JOB, self)==ECommunication.YES:
                         self._workplace = wp
                         break
@@ -46,11 +46,14 @@ class Worker(Agent):
 
             # Calculate utility
             if self._workplace==None: 
-                self._utility = Simulation.benefits - Settings.worker_disutility * self._S  # If not working
+                self._utility = Simulation.benefits * math.exp(- Settings.worker_eta * self._S)  # If not working
             else:
                 self._utility = Simulation.wage                             
 
-            self._utility_discounted = Settings.worker_beta * self._utility_discounted + self._utility
+            self._utility_discounted = Settings.worker_beta * self._utility_discounted\
+            + self._utility ** (1-Settings.worker_rho) / (1-Settings.worker_rho)
+
+
 
     @property
     def S(self):
@@ -97,15 +100,16 @@ class Workplace(Agent):
 #        elif id_event == Event.UPDATE:
 
         elif id_event == Event.PERIOD_STOP:
-            Y = self._A ** (1-Settings.workplace_alpha) * (self._theta / Settings.workplace_alpha) * self._L ** Settings.workplace_alpha
-            self._profit = Simulation.price * Y - Simulation.wage * self._L - Settings.workplace_kappa * self._V
+            Y = self._A ** (1-Settings.workplace_alpha) * (self._theta / Settings.workplace_alpha)\
+                 * self._L ** Settings.workplace_alpha
+
+            self._profit = Simulation.price * Y - Simulation.wage * self._L\
+                 - Settings.workplace_kappa * self._V
+            
             self._profit_discounted = Settings.workplace_beta * self._profit_discounted + self._profit
 
             self._theta = math.exp(math.log(self._theta) + random.gauss(0, Settings.workplace_sigma))
-            if (Simulation.time > 50) & (self._profit_discounted<-10000):
-                L_hat = self._A * (self._theta /(Simulation.wage / Simulation.price)) ** (1/(1-Settings.workplace_alpha))
-                N_hat = L_hat - (1 - Settings.worker_delta) * self._L
-                zz=22
+
 
     def communicate(self, e_communication, worker):
         if e_communication==ECommunication.DO_YOU_HAVE_A_JOB:
@@ -117,7 +121,7 @@ class Workplace(Agent):
                 return ECommunication.NO
 
         elif e_communication==ECommunication.I_QUIT:
-            self._hired = self._hired - 1
+            #self._hired = self._hired - 1
             self._L = self._L - 1 
             return ECommunication.OK
 
@@ -161,8 +165,9 @@ class Statistics(Agent):
                 profit_discounted = [wp.profit_discounted for wp in Simulation.workplaces] 
                 S = [w.S for w in Simulation.workers] 
                 utility_discounted = [w.utility_discounted for w in Simulation.workers] 
-                unemployment_duration = [w.unemployment_duration for w in Simulation.workers] 
-                
+                unemployment_duration = [w.unemployment_duration for w in Simulation.workers 
+                                         if w.workplace==None] 
+
                 plt.clf()
                 plot1(self._L_tot)
                 plot2(gamma, profit_discounted)
@@ -195,6 +200,9 @@ class Simulation(Agent):
 
     def __init__(self):
         super().__init__()
+        if Settings.random_seed>0:
+            random.seed(Settings.random_seed)
+        
         self._statistics = Statistics(self)
         Simulation.workers = Agent(self)
         Simulation.workplaces = Agent(self)
@@ -211,7 +219,7 @@ class Simulation(Agent):
                     Worker(Simulation.workers, S_min + random.random()*d_S, wp)    # Job. Start with random S
                     wp.add_worker()
                 else:
-                    Worker(Simulation.workers, S_min + random.random()**d_S, None)  # No job. Start with random S
+                    Worker(Simulation.workers, S_min + random.random()*d_S, None)  # No job. Start with random S
 
         # Initializing macro variables
         Simulation.wage = 1
@@ -228,10 +236,9 @@ class Simulation(Agent):
 
             # The Event Pump: the actual simulation
             while Simulation.time < Settings.number_of_periods:
-                # Important when agents are searching
-                Simulation.workplaces.randomize_agents()           
                 self.event_proc(Event.PERIOD_START)
                 self.event_proc(Event.UPDATE)
+                self.event_proc(Event.PERIOD_STOP)
                 Simulation.time += 1
 
             # Stop the simulation
@@ -239,7 +246,7 @@ class Simulation(Agent):
         
         elif id_event == Event.UPDATE:
             # if Simulation.time == 100:       # Shock to the price level
-            #     Simulation.price = 0.5
+            #     Simulation.price = 0.9
             super().event_proc(id_event)
 
         else:
@@ -251,5 +258,4 @@ class Simulation(Agent):
 # We can now run the model
 #--------------------------
 Simulation()
-
 

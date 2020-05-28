@@ -12,7 +12,6 @@ class Agent:
         Keyword Arguments:
             parent {Agent} -- The parent object (default: {None})
         """
-
         self._id = Agent._nAgents
         Agent._nAgents += 1
         self._first, self._next = None, None
