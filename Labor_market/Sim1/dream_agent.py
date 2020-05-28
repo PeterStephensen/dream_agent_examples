@@ -22,7 +22,8 @@ class Agent:
         self.removed, self.remove_when_empty = False, False
         self._random_agent=None
         
-        if parent != None: parent.add_agent(self)
+        if parent is not None: 
+            parent.add_agent(self)
 
     def event_proc(self, id_event):
         """This method describes the behavior of the agent
@@ -52,7 +53,7 @@ class Agent:
         a._prev, a._next = self._last, None
         a._parent = self
     
-        if self._first == None:
+        if self._first is None:
             self._first = a
         else:
             self._last._next = a
@@ -75,8 +76,8 @@ class Agent:
         if self._count==1:
             self._first, self._last = None, None
         else:
-            if a._prev != None: a._prev._next = a._next
-            if a._next != None: a._next._prev = a._prev
+            if a._prev is not None: a._prev._next = a._next
+            if a._next is not None: a._next._prev = a._prev
             
             if a == self._first: self._first = a._next
             if a == self._last: self._last = a._prev
@@ -121,32 +122,40 @@ class Agent:
 
         if not isinstance(n, int):
             raise SystemExit('Error: Argument n in get_random_agent should be int.')
-
-        # If no children
-        if self._first == None:
+        
+        # If no children: end here
+        if self._first is None:    
             return None
 
-        if self._random_agent == None:
+        # If _random_agent not initialized: initialize
+        if self._random_agent == None:  
+            self.randomize_agents() # Start by randomizing            
             self._random_agent = self._first
 
-        if self._random_agent == self._first:
-            self.randomize_agents()            
-
-        nn = n  #0.3
+        # If n larger than the number of agents: use the agents available 
+        nn = n  
         if n > self._count:
             nn = self._count
 
+        # Generate the return-list
         ls = []
         i = 0
+        b_first=False # Did we pass _first?
         while (i < nn):
-            if self._random_agent != not_this_agent or not_this_agent==None:
+            if not (self._random_agent == not_this_agent):  # or (not_this_agent is None)
                 ls.append(self._random_agent)
                 i += 1
-            if self._random_agent._next != None:
+
+            if not (self._random_agent._next is None):
                 self._random_agent = self._random_agent._next
             else:
                 self._random_agent = self._first
+                b_first=True
 
+        # If we pass _first => new round => randomize 
+        if b_first:
+            self.randomize_agents()
+        
         return ls
 
 
