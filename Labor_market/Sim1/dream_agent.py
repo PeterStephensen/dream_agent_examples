@@ -1,4 +1,5 @@
 import random
+import sys
 
 class Agent:
     """Class used for agent based modelling and microsimulation
@@ -41,6 +42,9 @@ class Agent:
         Arguments:
             a {Agent} -- The new child agent
         """
+        if not isinstance(a, Agent):
+            raise SystemExit('Error: Argument a in add_agent should be Agent.')
+        
         # Release old relations
         a.remove_this_agent()
 
@@ -63,6 +67,9 @@ class Agent:
         Arguments:
             a {Agent} -- The child agent that should be removed
         """
+        if not isinstance(a, Agent):
+            raise SystemExit('Error: Argument a in remove_agent should be Agent.')
+
         self.removed = True
 
         if self._count==1:
@@ -108,6 +115,13 @@ class Agent:
         Returns:
             Agent -- A list of random agents. Returns None if no children
         """
+        
+        if (not (not_this_agent is None)) and (not isinstance(not_this_agent, bool)):
+            raise SystemExit('Error: Argument not_this_agent in get_random_agent should be None or bool.')
+
+        if not isinstance(n, int):
+            raise SystemExit('Error: Argument n in get_random_agent should be int.')
+
         # If no children
         if self._first == None:
             return None
@@ -146,6 +160,12 @@ class Agent:
         Returns:
             Agent -- A random agent or a list of agents. Returns None if no children
         """
+        if (not (not_this_agent is None)) and (not isinstance(not_this_agent, bool)):
+            raise SystemExit('Error: Argument not_this_agent in get_random_agent should be None or bool.')
+
+        if not isinstance(n, int):
+            raise SystemExit('Error: Argument n in get_random_agent should be int.')
+        
         ls = self.get_random_agents(not_this_agent=not_this_agent, n=n)
 
         if ls==None:
