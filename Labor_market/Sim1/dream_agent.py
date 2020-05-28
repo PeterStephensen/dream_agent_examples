@@ -98,16 +98,15 @@ class Agent:
                     lst[i]._prev, lst[i]._next = lst[i-1], lst[i+1]
 
 
-    def get_random_agent(self, not_this_agent=None, n=1, always_list=False):
-        """A random child agent is returned
+    def get_random_agents(self, not_this_agent=None, n=1):
+        """Generates a list of random child agents
 
         Keyword Arguments:
             not_this_agent {Agent} -- An agent not to return. Will often be 'this'.  (default: {None})
             n {int} -- Number of agents to return. If the number of agents is less than n, all agents are returned.  (default: {1})
-            always_list {bool} -- Return list, even when there is only one agent (default: {False})
 
         Returns:
-            Agent -- A random agent or a list of agents. Returns None if no children
+            Agent -- A list of random agents. Returns None if no children
         """
         # If no children
         if self._first == None:
@@ -122,7 +121,6 @@ class Agent:
 
         ls = []
         i = 0
-
         while (i < nn):
             if self._random_agent != not_this_agent or not_this_agent==None:
                 ls.append(self._random_agent)
@@ -132,7 +130,25 @@ class Agent:
             else:
                 self._random_agent = self._first
 
-        if (nn == 1) & (not always_list):
+        return ls
+
+
+    def get_random_agent(self, not_this_agent=None, n=1):
+        """A random child agent is returned
+
+        Keyword Arguments:
+            not_this_agent {Agent} -- An agent not to return. Will often be 'this'.  (default: {None})
+            n {int} -- Number of agents to return. If the number of agents is less than n, all agents are returned.  (default: {1})
+
+        Returns:
+            Agent -- A random agent or a list of agents. Returns None if no children
+        """
+        ls = self.get_random_agents(not_this_agent=not_this_agent, n=n)
+
+        if ls==None:
+            return None
+
+        if (len(ls) == 1):
             return ls[0]
         else:
             return ls
