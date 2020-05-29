@@ -1,6 +1,8 @@
 import random
 import matplotlib.pyplot as plt
 import math
+from datetime import datetime
+import os
 
 from dream_agent import Agent
 from dream_agent import local_mean
@@ -61,7 +63,11 @@ class Worker(Agent):
                     best_S = Simulation.statistics.best_S 
                     if best_S is not None:                    
                         adj = Settings.worker_learn_adjustment
-                        self._S = (1 - adj)*self._S + adj*best_S                        
+                        self._S = (1 - adj)*self._S + adj*best_S
+
+                if random.random() < Settings.worker_learn_probabilily_mutation:
+                    a = random.random()
+                    self._S = a * Settings.worker_min_S + (1-a) * Settings.worker_max_S
 
 
 
@@ -97,27 +103,45 @@ class Workplace(Agent):
         self._profit=0
         self._profit_discounted=0
 
-        # Calibration af A
-        self._A = Settings.number_of_workers_per_workplace * Settings.worker_probability_job_init
-
     def event_proc(self, id_event):
         if id_event == Event.PERIOD_START:
-            L_hat = self._A * (self._theta /(Simulation.wage / Simulation.price)) ** (1/(1-Settings.workplace_alpha))
-            N_hat = L_hat - (1 - Settings.worker_delta) * self._L
+            A = Simulation.A
+            p = Simulation.price
+            w = Simulation.wage
+            alpha = Settings.workplace_alpha
+            kappa = Settings.workplace_kappa
+            delta = Settings.worker_delta
+
+            L_hat = (p*A*self._theta/(w + kappa*delta*self._gamma))**(1/(1-alpha))
+            N_hat = L_hat - (1 -delta) * self._L
             self._V = self._gamma * N_hat
+            n = int(math.floor(self._V))
+            prob = self._V - math.floor(self._V)
+            if random.random() < prob: n += 1
+            self._V = n                       
             self._hired=0
 
 #        elif id_event == Event.UPDATE:
 
         elif id_event == Event.PERIOD_STOP:
             # Calculating profit and updating technology
-            Y = self._A ** (1-Settings.workplace_alpha) * (self._theta / Settings.workplace_alpha)\
-                 * self._L ** Settings.workplace_alpha
+            A = Simulation.A
+            p = Simulation.price
+            w = Simulation.wage
+            alpha = Settings.workplace_alpha
+            kappa = Settings.workplace_kappa
+            beta = Settings.worker_beta
+            delta = Settings.worker_delta
 
-            self._profit = Simulation.price * Y - Simulation.wage * self._L\
-                 - Settings.workplace_kappa * self._V
-            
-            self._profit_discounted = Settings.workplace_beta * self._profit_discounted + self._profit
+            Y = A * self._theta * self._L**alpha / alpha
+            self._profit = p * Y - w * self._L - kappa * self._V         
+            self._profit_discounted = beta * self._profit_discounted + self._profit
+
+            L_hat = (p*A*self._theta/(w + kappa*delta*self._gamma))**(1/(1-alpha))
+            N_hat = L_hat - (1 - delta) * self._L
+
+            if self._profit_discounted < -3000:
+                zz=22
 
             self._theta = math.exp(math.log(self._theta) + random.gauss(0, Settings.workplace_sigma))
 
@@ -129,6 +153,9 @@ class Workplace(Agent):
                         adj = Settings.workplace_learn_adjustment
                         self._gamma = (1 - adj)*self._gamma + adj*best_gamma                        
 
+                if random.random() < Settings.workplace_learn_probabilily_mutation:
+                    a = random.random()
+                    self._gamma = a * Settings.workplace_min_gamma + (1-a) * Settings.workplace_max_gamma
 
     def communicate(self, e_communication, worker):
         if e_communication==ECommunication.DO_YOU_HAVE_A_JOB:
@@ -217,18 +244,22 @@ class Statistics(Agent):
                 plot2(gamma, profit_discounted)
                 plot3(S, utility_discounted)
                 plot4(L)
-                plot5(unemployment_duration)
-                plot6(self._best_S_series)
-                plot7(self._best_gamma_series)
-                plot8(self._unemployed_series)
+                plot5(self._unemployed_series)
+                plot6(self._best_gamma_series)
+                plot7(self._best_S_series)
+                plot8(unemployment_duration)
                 plt.show()
 
                 if show_pic: 
                     plt.pause(1e-6) # Crude animation
 
                 if last_periode:    # Final pic open for 15 sec. and saved
-                    plt.savefig("Labor_market//Sim1//graphics//sim1.png")
-                    plt.pause(15)
+                    now = datetime.now()
+                    file = "Labor_market//Sim1//graphics//sim1_{}.png".format(now.strftime("%m_%d_%Y__%H_%M_%S"))
+                    plt.savefig(file)
+                    plt.pause(1)
+                    os.system("start " + file)
+
 
             # print to terminal 
             print("{}\t{}".format(Simulation.time, sum(L)))
@@ -254,6 +285,7 @@ class Simulation(Agent):
     wage=0
     price=0
     benefits=0
+    A=0
 
     def __init__(self):
         super().__init__()
@@ -281,8 +313,16 @@ class Simulation(Agent):
         # Initializing macro variables
         Simulation.wage = 1
         Simulation.price = 1
-        Simulation.benefits = 0.5        
+        Simulation.benefits = 0.5
 
+        # Calibration af A
+        L = Settings.number_of_workers_per_workplace * Settings.worker_probability_job_init
+        alpha = Settings.workplace_alpha
+        kappa = Settings.workplace_kappa
+        delta = Settings.worker_delta
+        gamma = 0.5*(Settings.workplace_min_gamma + Settings.workplace_max_gamma)
+        Simulation.A = L**(1-alpha) * (1 + kappa*gamma*delta)
+        
         # Start the simulation
         self.event_proc(Event.START)
 

@@ -59,28 +59,16 @@ def plot4(x):
 
 
 def plot5(x):
-    c = Counter(x)
-    x, n = list(c), list(c.values())
-
     plt.subplot(PLOT_ROW,PLOT_COL,5)
-    #plt.title(title)
-    plt.bar(x, n, width=0.5) 
-    plt.xlabel("Unemployment duration")
-    #plt.ylabel("Discounted utility")
-    plt.xlim(0, 50) 
-    #plt.ylim(-250000,1000) 
-
-def plot6(x):
-    plt.subplot(PLOT_ROW,PLOT_COL,6)
     #plt.title(title)
     plt.plot(x)
     plt.xlabel("Periods")
-    plt.ylabel("Best S")
+    plt.ylabel("Unemployed")
     plt.xlim(0, Settings.number_of_periods)     
-    plt.ylim(0, 4) 
+    plt.ylim(0, 10000) 
 
-def plot7(x):
-    plt.subplot(PLOT_ROW,PLOT_COL,7)
+def plot6(x):
+    plt.subplot(PLOT_ROW,PLOT_COL,6)
     #plt.title(title)
     plt.plot(x)
     plt.xlabel("Periods")
@@ -88,11 +76,24 @@ def plot7(x):
     plt.xlim(0, Settings.number_of_periods)     
     plt.ylim(0, 1) 
 
-def plot8(x):
-    plt.subplot(PLOT_ROW,PLOT_COL,8)
+def plot7(x):
+    plt.subplot(PLOT_ROW,PLOT_COL,7)
     #plt.title(title)
     plt.plot(x)
     plt.xlabel("Periods")
-    plt.ylabel("Unemployed")
+    plt.ylabel("Best S")
     plt.xlim(0, Settings.number_of_periods)     
-    plt.ylim(0, 10000) 
+    plt.ylim(0, 4) 
+
+
+def plot8(x):
+    c = Counter(x)
+    x, n = list(c), list(c.values())
+
+    plt.subplot(PLOT_ROW,PLOT_COL,8)
+    #plt.title(title)
+    plt.bar(x, n, width=0.5) 
+    plt.xlabel("Unemployment duration")
+    #plt.ylabel("Discounted utility")
+    plt.xlim(0, 50) 
+    #plt.ylim(-250000,1000) 
