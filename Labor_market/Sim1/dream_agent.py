@@ -1,5 +1,6 @@
 import random
 import sys
+import numpy as np
 
 class Agent:
     """Class used for agent based modelling and microsimulation
@@ -252,3 +253,51 @@ class Agent:
         """
         return Agent._nAgents
 
+
+# Poor man's loess. Fine and quick if many data points 
+def local_mean(x,y, n=10):
+
+    xx, yy = (list(t) for t in zip(*sorted(zip(x, y)))) # sort x and y after x
+
+    m = int(len(x)/n) # Number of data points in each group
+
+    x_o, y_o = [], []
+    x_sum, y_sum, v = 0, 0, 0
+    j=1
+    for i in range(len(x)):
+        if v < m:
+            x_sum += xx[i]
+            y_sum += yy[i]
+            v += 1
+        else:
+            x_o.append(x_sum/m)
+            y_o.append(y_sum/m)
+            x_sum, y_sum, v = 0, 0, 0
+            j += 1
+
+    return x_o, y_o 
+
+# Poor man's loess. Fine and quick if many data points 
+def local_mean_old(x,y, n=10, xmin=None, xmax=None):
+    if xmin is None: xmin = min(x)
+    if xmax is None: xmax = max(x)
+    seq = np.linspace(xmin,xmax,n+1)
+
+    xx, yy = (list(t) for t in zip(*sorted(zip(x, y)))) # sort x and y after x
+
+    x_o, y_o = [], []
+    x_sum, y_sum, n = 0, 0, 0
+    j=1
+    for i in range(len(x)):
+        if xx[i] < seq[j]:
+            x_sum += xx[i]
+            y_sum += yy[i]
+            n += 1
+        else:
+            if n>0:
+                x_o.append(x_sum/n)
+                y_o.append(y_sum/n)
+            x_sum, y_sum, n = 0, 0, 0
+            j += 1
+
+    return x_o, y_o 

@@ -3,6 +3,8 @@ import matplotlib.pyplot as plt
 import math
 
 from dream_agent import Agent
+from dream_agent import local_mean
+
 from enums import *
 from settings import *
 from plots import *
@@ -53,6 +55,14 @@ class Worker(Agent):
             self._utility_discounted = Settings.worker_beta * self._utility_discounted\
             + self._utility ** (1-Settings.worker_rho) / (1-Settings.worker_rho)
 
+            # Learning
+            if Settings.worker_learn:
+                if random.random() < Settings.worker_learn_probabilily:
+                    best_S = Simulation.statistics.best_S 
+                    if best_S is not None:                    
+                        adj = Settings.worker_learn_adjustment
+                        self._S = (1 - adj)*self._S + adj*best_S                        
+
 
 
     @property
@@ -100,6 +110,7 @@ class Workplace(Agent):
 #        elif id_event == Event.UPDATE:
 
         elif id_event == Event.PERIOD_STOP:
+            # Calculating profit and updating technology
             Y = self._A ** (1-Settings.workplace_alpha) * (self._theta / Settings.workplace_alpha)\
                  * self._L ** Settings.workplace_alpha
 
@@ -109,6 +120,14 @@ class Workplace(Agent):
             self._profit_discounted = Settings.workplace_beta * self._profit_discounted + self._profit
 
             self._theta = math.exp(math.log(self._theta) + random.gauss(0, Settings.workplace_sigma))
+
+            # Learning
+            if Settings.workplace_learn:
+                if random.random() < Settings.workplace_learn_probabilily:
+                    best_gamma = Simulation.statistics.best_gamma 
+                    if best_gamma is not None:                    
+                        adj = Settings.workplace_learn_adjustment
+                        self._gamma = (1 - adj)*self._gamma + adj*best_gamma                        
 
 
     def communicate(self, e_communication, worker):
@@ -149,12 +168,37 @@ class Statistics(Agent):
     def event_proc(self, id_event):
         if id_event == Event.START:
             graphics_init() # Initialize graphics
-            self._L_tot = []          
+            self._L_tot = []
+            self._best_S_series = []
+            self._best_gamma_series = []
+            self._unemployed_series = []
+            self._best_S=None          
+            self._best_gamma=None          
 
         elif id_event == Event.PERIOD_START:
             # Collect time series data
             L = [wp.L for wp in Simulation.workplaces] 
             self._L_tot.append(sum(L))
+
+            u = [1 for w in Simulation.workers if w.workplace is None] 
+            self._unemployed_series.append(sum(u))
+
+            self._best_S_series.append(self.best_S)
+            self._best_gamma_series.append(self.best_gamma)
+
+
+            if Simulation.time % Settings.statistics_update_learn==0:
+                if Settings.worker_learn:
+                    S = [w.S for w in Simulation.workers] 
+                    utility_discounted = [w.utility_discounted for w in Simulation.workers] 
+                    s, u = local_mean(S, utility_discounted, n=Settings.worker_learn_n_points) 
+                    self._best_S = s[u.index(max(u))]
+
+                if Settings.workplace_learn:
+                    gamma = [wp.gamma for wp in Simulation.workplaces] 
+                    profit_discounted = [wp.profit_discounted for wp in Simulation.workplaces] 
+                    g, p = local_mean(gamma, profit_discounted, n=Settings.workplace_learn_n_points) 
+                    self._best_gamma = g[p.index(max(p))]
 
             # Show real time graphics (every graphics_periods_per_pic periode)
             show_pic     = Simulation.time % Settings.graphics_periods_per_pic==0
@@ -174,6 +218,9 @@ class Statistics(Agent):
                 plot3(S, utility_discounted)
                 plot4(L)
                 plot5(unemployment_duration)
+                plot6(self._best_S_series)
+                plot7(self._best_gamma_series)
+                plot8(self._unemployed_series)
                 plt.show()
 
                 if show_pic: 
@@ -186,14 +233,24 @@ class Statistics(Agent):
             # print to terminal 
             print("{}\t{}".format(Simulation.time, sum(L)))
 
+    @property
+    def best_S(self):
+        return self._best_S
+
+    @property
+    def best_gamma(self):
+        return self._best_gamma
+
+
 
 # The Simulation object
 #---------------------------
 class Simulation(Agent):
     # Static fields: Can be viewed by the other agents
     time=0
-    workers = Agent()
-    workplaces = Agent()
+    workers=None
+    workplaces=None
+    statistics=None
     wage=0
     price=0
     benefits=0
@@ -203,7 +260,7 @@ class Simulation(Agent):
         if Settings.random_seed>0:
             random.seed(Settings.random_seed)
         
-        self._statistics = Statistics(self)
+        Simulation.statistics = Statistics(self)
         Simulation.workers = Agent(self)
         Simulation.workplaces = Agent(self)
 
@@ -245,8 +302,11 @@ class Simulation(Agent):
             self.event_proc(Event.STOP)
         
         elif id_event == Event.UPDATE:
-            # if Simulation.time == 100:       # Shock to the price level
-            #     Simulation.price = 0.9
+            if (Simulation.time >= 200) and (Simulation.time <= 210):       # Shock to the price level
+                Simulation.price = 0.95
+            else:
+                Simulation.price = 1.00
+
             super().event_proc(id_event)
 
         else:
