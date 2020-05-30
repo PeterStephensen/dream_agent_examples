@@ -7,14 +7,16 @@ import os
 from dream_agent import Agent
 from dream_agent import local_mean
 
-from enums import *
-from settings import *
-from plots import *
+from enums import Event, ECommunication   
+from settings import Settings
+from plots import graphics_init
+from plots import plot1, plot2, plot3, plot4, plot5, plot6, plot7, plot8
 
-# The Workers object
+
+# The Worker object
 #---------------------------
 class Worker(Agent):
-
+    
     def __init__(self, parent=None, S=0, workplace=None):
         super().__init__(parent)
         self._S = S
@@ -114,11 +116,15 @@ class Workplace(Agent):
 
             L_hat = (p*A*self._theta/(w + kappa*delta*self._gamma))**(1/(1-alpha))
             N_hat = L_hat - (1 -delta) * self._L
-            self._V = self._gamma * N_hat
-            n = int(math.floor(self._V))
-            prob = self._V - math.floor(self._V)
-            if random.random() < prob: n += 1
-            self._V = n                       
+            if N_hat > 0:
+                self._V = self._gamma * N_hat
+                n = int(math.floor(self._V))
+                prob = self._V - math.floor(self._V)
+                if random.random() < prob: n += 1
+                self._V = n                       
+            else:
+                self._V = 0                       
+            
             self._hired=0
 
 #        elif id_event == Event.UPDATE:
@@ -137,11 +143,11 @@ class Workplace(Agent):
             self._profit = p * Y - w * self._L - kappa * self._V         
             self._profit_discounted = beta * self._profit_discounted + self._profit
 
-            L_hat = (p*A*self._theta/(w + kappa*delta*self._gamma))**(1/(1-alpha))
-            N_hat = L_hat - (1 - delta) * self._L
+            # L_hat = (p*A*self._theta/(w + kappa*delta*self._gamma))**(1/(1-alpha))
+            # N_hat = L_hat - (1 - delta) * self._L
 
-            if self._profit_discounted < -3000:
-                zz=22
+            # if self._profit_discounted < -3000:
+            #     zz=22
 
             self._theta = math.exp(math.log(self._theta) + random.gauss(0, Settings.workplace_sigma))
 
@@ -160,20 +166,20 @@ class Workplace(Agent):
     def communicate(self, e_communication, worker):
         if e_communication==ECommunication.DO_YOU_HAVE_A_JOB:
             if self._hired < self._V:
-                self._hired = self._hired + 1
-                self._L = self._L + 1 
+                self._hired += 1
+                self._L += 1 
                 return ECommunication.YES
             else:
                 return ECommunication.NO
 
         elif e_communication==ECommunication.I_QUIT:
             #self._hired = self._hired - 1
-            self._L = self._L - 1 
+            self._L -= 1 
             return ECommunication.OK
 
 
     def add_worker(self):
-        self._L=self._L+1
+        self._L += 1
 
     @property
     def gamma(self):
@@ -215,17 +221,24 @@ class Statistics(Agent):
 
 
             if Simulation.time % Settings.statistics_update_learn==0:
+                adj = Settings.statistics_update_learn_adjust
                 if Settings.worker_learn:
                     S = [w.S for w in Simulation.workers] 
                     utility_discounted = [w.utility_discounted for w in Simulation.workers] 
                     s, u = local_mean(S, utility_discounted, n=Settings.worker_learn_n_points) 
-                    self._best_S = s[u.index(max(u))]
+                    if self._best_S is None:
+                        self._best_S = s[u.index(max(u))]   
+                    else:
+                        self._best_S = adj * s[u.index(max(u))] + (1 - adj) * self._best_S
 
                 if Settings.workplace_learn:
                     gamma = [wp.gamma for wp in Simulation.workplaces] 
                     profit_discounted = [wp.profit_discounted for wp in Simulation.workplaces] 
                     g, p = local_mean(gamma, profit_discounted, n=Settings.workplace_learn_n_points) 
-                    self._best_gamma = g[p.index(max(p))]
+                    if self._best_gamma is None:
+                        self._best_gamma = g[p.index(max(p))]
+                    else:    
+                        self._best_gamma = adj * g[p.index(max(p))] + (1 - adj) * self._best_gamma
 
             # Show real time graphics (every graphics_periods_per_pic periode)
             show_pic     = Simulation.time % Settings.graphics_periods_per_pic==0
@@ -342,8 +355,9 @@ class Simulation(Agent):
             self.event_proc(Event.STOP)
         
         elif id_event == Event.UPDATE:
-            if (Simulation.time >= 200) and (Simulation.time <= 210):       # Shock to the price level
+            if (Simulation.time >= 100) and (Simulation.time <= 300):       # Shock to the price level
                 Simulation.price = 0.95
+                Settings.graphics_periods_per_pic = 1
             else:
                 Simulation.price = 1.00
 
@@ -352,8 +366,6 @@ class Simulation(Agent):
         else:
             # All other events are send to defendants
             super().event_proc(id_event)
-
-
 
 # We can now run the model
 #--------------------------

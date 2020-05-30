@@ -256,6 +256,22 @@ class Agent:
 
 # Poor man's loess. Fine and quick if many data points 
 def local_mean(x,y, n=10):
+    """Calculating local means. Poor man's loess. Fine and quick if many data points. 
+    The algorithm works like this:
+          1) x and y are sorted according to x, 
+          2) the data is split in n equally sized parts, and
+          3) means are calculated for both x and y in each part.     
+
+    Arguments:
+        x {list} -- The x data
+        y {list} -- The y data
+
+    Keyword Arguments:
+        n {int} -- The number of parts (default: {10})
+
+    Returns:
+        {list, list} -- n mean values of x and y
+    """
 
     xx, yy = (list(t) for t in zip(*sorted(zip(x, y)))) # sort x and y after x
 
@@ -277,27 +293,4 @@ def local_mean(x,y, n=10):
 
     return x_o, y_o 
 
-# Poor man's loess. Fine and quick if many data points 
-def local_mean_old(x,y, n=10, xmin=None, xmax=None):
-    if xmin is None: xmin = min(x)
-    if xmax is None: xmax = max(x)
-    seq = np.linspace(xmin,xmax,n+1)
 
-    xx, yy = (list(t) for t in zip(*sorted(zip(x, y)))) # sort x and y after x
-
-    x_o, y_o = [], []
-    x_sum, y_sum, n = 0, 0, 0
-    j=1
-    for i in range(len(x)):
-        if xx[i] < seq[j]:
-            x_sum += xx[i]
-            y_sum += yy[i]
-            n += 1
-        else:
-            if n>0:
-                x_o.append(x_sum/n)
-                y_o.append(y_sum/n)
-            x_sum, y_sum, n = 0, 0, 0
-            j += 1
-
-    return x_o, y_o 

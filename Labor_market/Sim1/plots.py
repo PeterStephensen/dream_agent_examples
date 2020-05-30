@@ -1,10 +1,15 @@
 import matplotlib.pyplot as plt
 import numpy as np
-
 from collections import Counter
-from settings import Settings
 
+from settings import Settings
 from dream_agent import local_mean
+
+# Usefull table function
+def table(x):
+    c = Counter(x)
+    return list(c), list(c.values())
+
 
 def graphics_init():
     plt.ion()   # Necessary to get animation effect 
@@ -13,7 +18,7 @@ def graphics_init():
 PLOT_ROW = 2
 PLOT_COL = 4
 
-def plot1(x):
+def plot1(x):  
     plt.subplot(PLOT_ROW,PLOT_COL,1)
     #plt.title(title)
     plt.plot(x)
@@ -51,7 +56,9 @@ def plot3(x,y):
 def plot4(x):
     plt.subplot(PLOT_ROW,PLOT_COL,4)
     #plt.title(title)
-    plt.hist(x)
+    # plt.hist(x)
+    xx , n = table(x)
+    plt.bar(xx, n) 
     plt.xlabel("L")
     #plt.ylabel("Discounted utility")
     # plt.xlim(0, Settings.number_of_periods) 
@@ -87,13 +94,11 @@ def plot7(x):
 
 
 def plot8(x):
-    c = Counter(x)
-    x, n = list(c), list(c.values())
-
     plt.subplot(PLOT_ROW,PLOT_COL,8)
     #plt.title(title)
-    plt.bar(x, n, width=0.5) 
+    xx , n = table(x)
+    plt.bar(xx, n) #, width=0.5 
     plt.xlabel("Unemployment duration")
     #plt.ylabel("Discounted utility")
-    plt.xlim(0, 50) 
+    plt.xlim(0, 150) 
     #plt.ylim(-250000,1000) 
