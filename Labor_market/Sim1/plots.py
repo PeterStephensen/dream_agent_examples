@@ -32,7 +32,7 @@ def plot1(x):
 def plot2(x,y):
     plt.subplot(PLOT_ROW,PLOT_COL,2)
     #plt.title(title)
-    plt.plot(x,y, 'o', ms=3)
+    plt.plot(x,y, 'o', ms=1)
     xx, yy = local_mean(x, y, n=15)
     plt.plot(xx,yy, color="red")
     plt.xlabel("gamma")
@@ -72,7 +72,7 @@ def plot5(x):
     plt.xlabel("Periods")
     plt.ylabel("Unemployed")
     plt.xlim(0, Settings.number_of_periods)     
-    plt.ylim(0, 10000) 
+    plt.ylim(0, 20000) 
 
 def plot6(x):
     plt.subplot(PLOT_ROW,PLOT_COL,6)

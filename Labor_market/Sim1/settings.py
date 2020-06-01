@@ -5,8 +5,6 @@ class Settings: pass
 Settings.number_of_workplaces = 2000
 Settings.number_of_workers_per_workplace = 20
 
-# Settings.worker_max_S = 1.5 # maximum number of job search
-# Settings.worker_min_S = 1.5 # maximum number of job search
 Settings.worker_max_S = 5 # maximum number of job search
 Settings.worker_min_S = 0.1 # maximum number of job search
 Settings.worker_probability_job_init = 0.9 # Probability of having job when the model starts
@@ -21,8 +19,6 @@ Settings.worker_learn_adjustment = 0.15 # Adjustment speed in learning process
 Settings.worker_learn_probabilily_mutation = 0.0 # Probabilily of mutation
 
 
-# Settings.workplace_max_gamma = 0.3 # maximum gamma
-# Settings.workplace_min_gamma = 0.3 # maximum gamma
 Settings.workplace_max_gamma = 2.5 # maximum gamma
 Settings.workplace_min_gamma = 0.001 # maximum gamma
 Settings.workplace_beta = 0.80 # Discounting factor

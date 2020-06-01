@@ -82,7 +82,7 @@ Labor market, Sim1
 \end_layout
 
 \begin_layout Author
-Peter Stephensen, DREAM (Version 0.1)
+Peter Stephensen, DREAM (Version 0.2)
 \end_layout
 
 \begin_layout Standard
@@ -211,7 +211,7 @@ te arbejdsplads har
  ansatte og producerer
 \begin_inset Formula 
 \[
-Y_{jt}=A_{j}^{1-\alpha}\theta_{jt}\frac{1}{\alpha}L_{jt}^{\alpha},\,\alpha<1
+Y_{jt}=\frac{A_{t}\theta_{jt}}{\alpha}L_{jt}^{\alpha},\,\alpha<1
 \]
 
 \end_inset
@@ -220,15 +220,24 @@ Y_{jt}=A_{j}^{1-\alpha}\theta_{jt}\frac{1}{\alpha}L_{jt}^{\alpha},\,\alpha<1
 \end_layout
 
 \begin_layout Standard
-Alle ansatte får markedslønnen 
+hvor 
+\begin_inset Formula $A_{t}$
+\end_inset
+
+ er makro-produktiviteten (ens for alle virksomheder) og 
+\begin_inset Formula $\theta_{jt}$
+\end_inset
+
+ er en virksomhedsspecifik produktivitet.
+\end_layout
+
+\begin_layout Standard
+Alle ansatte får den centralt forhandlede løn 
 \begin_inset Formula $w_{t}.$
 \end_inset
 
  Denne løn er eksogen set fra arbejdspladsenes synsvinkel.
-\end_layout
-
-\begin_layout Standard
-Arbejdspladsens profit er givet ved:
+ Arbejdspladsens profit er givet ved:
 \begin_inset Formula 
 \[
 \pi_{jt}=p_{t}Y_{jt}-w_{t}L_{jt}-\kappa V_{jt}
@@ -245,67 +254,10 @@ hvor
 \end_inset
 
  er antallet at opslåede stillinger og 
-\begin_inset Formula $\kappa_{t}$
+\begin_inset Formula $\kappa$
 \end_inset
 
  er den omkostning arbejdspladsen har ved at have en stilling slået op.
-\end_layout
-
-\begin_layout Standard
-Hvis det var gratis at slå stillinger op ville den optimale beskæftigelse
- maksimere
-\begin_inset Formula 
-\[
-\hat{\pi}_{jt}=p_{t}A_{j}^{1-\alpha}\theta_{jt}\frac{1}{\alpha}L_{jt}^{\alpha}-w_{t}L_{jt}
-\]
-
-\end_inset
-
-således at
-\begin_inset Formula 
-\begin{equation}
-\hat{L}_{jt}=A_{j}\left(\frac{\theta_{jt}}{w_{t}/p_{t}}\right)^{\frac{1}{1-\alpha}}\label{eq:Lhat}
-\end{equation}
-
-\end_inset
-
-Det ses at 
-\begin_inset Formula $\phi_{jt}$
-\end_inset
-
- repræsenterer arbejdsplads-specifikke stød til beskæftigelse og at ændringer
- i 
-\begin_inset Formula $w_{t}/p_{t}$
-\end_inset
-
- giver anledning til makro-stød til beskæftigelsen der er ens for alle arbejdspl
-adser.
- Vi antager at 
-\begin_inset Formula $p_{t}$
-\end_inset
-
- følger en sinus-kurve (svarende til konjunkturudsving) og at 
-\begin_inset Formula $w=w_{t}.$
-\end_inset
-
- parameteren 
-\begin_inset Formula $\phi_{jt}$
-\end_inset
-
- følger en random-walk:
-\begin_inset Formula 
-\[
-log\left(\phi_{jt}\right)=log\left(\phi_{j,t-1}\right)+\epsilon_{jt}
-\]
-
-\end_inset
-
-hvor 
-\begin_inset Formula $E\left[\epsilon_{jt}\epsilon_{it}\right]=0$
-\end_inset
-
-.
- 
 \end_layout
 
 \begin_layout Standard
@@ -328,21 +280,33 @@ hvor
 \end_inset
 
  En sådan funktion findes hverken i virkeligheden eller vores model.
+\end_layout
+
+\begin_layout Standard
+Det er virksomhedens opgave at opslå et tilstrækkeligt antal stillinger
+ 
+\begin_inset Formula $V_{jt}$
+\end_inset
+
+ således at et passende antal 
+\begin_inset Formula $N_{jt}$
+\end_inset
+
+ ansættes.
+ Sammenhængen mellem disse to størrelser afhænger i høj grad af markedets
+ tilstand.
+ Hvis der f.eks.
+ er mangel på arbejdskraft skal man slå flere stillinger op for at få et
+ givent antal nyansatte.
  
 \end_layout
 
 \begin_layout Standard
-Lad os ud fra (
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "eq:Lhat"
-plural "false"
-caps "false"
-noprefix "false"
-
+I en stationær tilstand (
+\begin_inset Formula $L_{jt}=L_{j,t-1}$
 \end_inset
 
-) og (
+) vil det i følge (
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "eq:N"
@@ -352,19 +316,11 @@ noprefix "false"
 
 \end_inset
 
-) beregne hvor mange nye 
-\begin_inset Formula $\hat{N}_{jt}$
-\end_inset
-
- der skal ansætte for at opnå det ønskede antal ansatte 
-\begin_inset Formula $\hat{L}_{jt}$
-\end_inset
-
-: 
+) gældet at 
 \begin_inset Formula 
-\[
-\hat{N}_{jt}=\hat{L}_{jt}-\left(1-\delta\right)L_{j,t-1}
-\]
+\begin{equation}
+N_{jt}=\delta L_{jt}\label{eq:stationary}
+\end{equation}
 
 \end_inset
 
@@ -372,22 +328,125 @@ noprefix "false"
 \end_layout
 
 \begin_layout Standard
-Vi antager at virksomheden følger en tommelfinger-regel:
+Lad os antage at virksomheden har en tommelfingerregel der siger at
+\begin_inset Formula 
+\begin{equation}
+V_{jt}=\gamma_{j}N_{jt}\label{eq:r-o-t}
+\end{equation}
+
+\end_inset
+
+Hvis man ønsker 
+\begin_inset Formula $N_{jt}$
+\end_inset
+
+ skal der slås 
+\begin_inset Formula $\gamma_{j}N_{jt}$
+\end_inset
+
+ stillinger op.
+ Profitten vil da være givet ved:
 \begin_inset Formula 
 \[
-V_{jt}=\gamma_{j}\hat{N}_{jt}
+\pi_{jt}=p_{t}Y_{jt}-\left(w_{t}+\kappa\gamma_{j}\delta\right)L_{jt}
 \]
 
 \end_inset
 
-således at
+Hvis virksomheden maksimerer profit i den stationære tilstand og givet tommelfin
+gerreglen (
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:r-o-t"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+) fås den optimale beskæftigelse:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+\hat{L}_{jt}=\left(\frac{p_{t}A_{t}\theta_{jt}}{w_{t}+\kappa\gamma_{j}\delta}\right)^{\frac{1}{1-\alpha}}\label{eq:Lhat}
+\end{equation}
+
+\end_inset
+
+Vi antager at virksomheden ønsker at bevæge sig mod beskæftigelsen 
+\begin_inset Formula $\hat{L}_{jt}.$
+\end_inset
+
+ I følge (
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:N"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+) kræver dette at der ansættes 
+\begin_inset Formula $\hat{N}_{jt}$
+\end_inset
+
+ personer:
 \begin_inset Formula 
 \[
-V_{jt}=\gamma_{j}\left(\hat{L}_{jt}-\left(1-\delta\right)L_{j,t-1}\right)
+\hat{N}_{jt}=\hat{L}_{jt}-\left(1-\delta\right)L_{j,t-1}
 \]
 
 \end_inset
 
+I følge tommefingerreglen (
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:r-o-t"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+) kræver dette at der slås 
+\begin_inset Formula $\hat{V}_{jt}$
+\end_inset
+
+ stillinger op:
+\begin_inset Formula 
+\[
+\hat{V}_{jt}=\gamma_{j}\hat{N}_{jt}
+\]
+
+\end_inset
+
+Teknologiparameteren 
+\begin_inset Formula $\phi_{jt}$
+\end_inset
+
+ antages at følge en random-walk:
+\begin_inset Formula 
+\[
+log\left(\phi_{jt}\right)=log\left(\phi_{j,t-1}\right)+\epsilon_{jt}
+\]
+
+\end_inset
+
+hvor 
+\begin_inset Formula $E\left[\epsilon_{jt}\epsilon_{it}\right]=0$
+\end_inset
+
+ for alle 
+\begin_inset Formula $j,i.$
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
 Virksomhedens strategi-variabel er 
 \begin_inset Formula $\gamma_{j}.$
 \end_inset

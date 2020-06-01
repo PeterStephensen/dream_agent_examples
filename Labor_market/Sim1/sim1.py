@@ -173,7 +173,6 @@ class Workplace(Agent):
                 return ECommunication.NO
 
         elif e_communication==ECommunication.I_QUIT:
-            #self._hired = self._hired - 1
             self._L -= 1 
             return ECommunication.OK
 
@@ -274,6 +273,10 @@ class Statistics(Agent):
                     os.system("start " + file)
 
 
+
+
+
+
             # print to terminal 
             print("{}\t{}".format(Simulation.time, sum(L)))
 
@@ -284,7 +287,6 @@ class Statistics(Agent):
     @property
     def best_gamma(self):
         return self._best_gamma
-
 
 
 # The Simulation object
@@ -370,4 +372,5 @@ class Simulation(Agent):
 # We can now run the model
 #--------------------------
 Simulation()
+
 
