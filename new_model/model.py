@@ -22,7 +22,7 @@ class Person(Agent):
 
     def event_proc(self, id_event):
         # Behavior in the start of the period. Here: Nothing implemented
-        if id_event == Event.PERIOD_STOP: 
+        if id_event == Event.PERIOD_START: 
             return
 
         # Behavior during the periode: Here: You get one period older  
@@ -100,9 +100,8 @@ class Statistics(Agent):
 #---------------------------
 class Simulation(Agent):
     # Static fields: Can be viewed by the other agents
-    time=0
+    time=-1 # If time=-1 the model has not started yet.
     persons=None
-
 
     def __init__(self):
         super().__init__()
@@ -126,6 +125,7 @@ class Simulation(Agent):
             super().event_proc(id_event)
 
             # The Event Pump: the actual simulation
+            Simulation.time=0
             while Simulation.time < Settings.number_of_periods:
                 self.event_proc(Event.PERIOD_START)
                 self.event_proc(Event.UPDATE)
