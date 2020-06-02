@@ -151,10 +151,7 @@ Arbejderen har på tidspunkt
  nyttefunktionen
 \begin_inset Formula 
 \begin{align*}
-u_{t} & =\begin{cases}
-w_{t} & \text{hvis beskæftiget}\\
-b\,e^{-\eta S_{t}} & \text{hvis ikke beskæftiget}
-\end{cases}\\
+\\
 \end{align*}
 
 \end_inset

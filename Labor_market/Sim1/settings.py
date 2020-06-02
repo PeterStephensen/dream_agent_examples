@@ -2,7 +2,7 @@
 #---------------------------
 class Settings: pass
 
-Settings.number_of_workplaces = 2000
+Settings.number_of_workplaces = 1000
 Settings.number_of_workers_per_workplace = 20
 
 Settings.worker_max_S = 5 # maximum number of job search

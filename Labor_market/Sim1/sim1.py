@@ -263,7 +263,7 @@ class Statistics(Agent):
                 plt.show()
 
                 if show_pic: 
-                    plt.pause(1e-6) # Crude animation
+                    plt.pause(1e-1) # Crude animation
 
                 if last_periode:    # Final pic open for 15 sec. and saved
                     now = datetime.now()
