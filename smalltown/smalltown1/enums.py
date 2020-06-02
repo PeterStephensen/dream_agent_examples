@@ -12,7 +12,13 @@ class Event(Enum):
 # Communication
 #---------------------------
 class ECommunication(Enum):
-    YES = 1         
-    NO = 2         
-    OK = 3
-    HI = 4
+    YES=1         
+    NO=2         
+    OK=3
+    HI=4
+    DO_YOU_HAVE_A_JOB=5
+    I_QUIT=6
+    YOU_ARE_FIRED=7
+
+
+    

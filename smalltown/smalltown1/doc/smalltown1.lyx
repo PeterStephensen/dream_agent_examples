@@ -107,7 +107,50 @@ Virksomhederne
 \end_layout
 
 \begin_layout Standard
-dd
+Produktionsfunktion:
+\begin_inset Formula 
+\[
+Y_{jt}=\begin{cases}
+\frac{\theta_{jt}}{\alpha}\left(L_{jt}-\overline{L}\right)^{\alpha} & \text{for }L_{jt}\geq\overline{L}\\
+0 & \text{\text{for }\ensuremath{L_{jt}\ensuremath{<}\overline{L}}}
+\end{cases}
+\]
+
+\end_inset
+
+Prisen 
+\begin_inset Formula $\overline{p}_{t}$
+\end_inset
+
+ er eksogen.
+\end_layout
+
+\begin_layout Standard
+Profit:
+\begin_inset Formula 
+\[
+\pi_{jt}=\overline{p}_{t}Y_{jt}-w_{jt}L_{jt}
+\]
+
+\end_inset
+
+Optimal beskæftigelse:
+\begin_inset Formula 
+\[
+\hat{L}_{jt}=\overline{L}+\left(\frac{w_{jt}}{\overline{p}_{t}\theta_{jt}}\right)^{\frac{1}{\alpha-1}}
+\]
+
+\end_inset
+
+hvis
+\begin_inset Formula 
+\[
+\hat{\pi}_{jt}=\overline{p}_{t}\hat{Y}_{jt}-w_{jt}\hat{L}_{jt}\geq0
+\]
+
+\end_inset
+
+
 \end_layout
 
 \end_body

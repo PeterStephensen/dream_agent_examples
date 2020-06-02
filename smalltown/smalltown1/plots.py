@@ -11,18 +11,23 @@ def graphics_init():
 
 def plot1(x):  
     plt.subplot(PLOT_ROW,PLOT_COL, 1)
-    plt.title("This is plot 1")
+    #plt.title("This is plot 1")
     plt.plot(x)
     plt.xlabel("Periods")
-    plt.ylabel("Number of persons")
+    plt.ylabel("Number of households")
     plt.xlim(0, Settings.number_of_periods) 
 
 def plot2(x):  
     plt.subplot(PLOT_ROW,PLOT_COL, 2)
-    plt.title("This id plot 2")
-    a,n = table(x)
-    plt.bar(a, n)
-    plt.xlabel("Age")
+    #plt.title("Wage distribution")
+    plt.hist(x)
+    plt.xlabel("Wage")
     
+# def plot3(x):  
+#     plt.subplot(PLOT_ROW,PLOT_COL, 2)
+#     plt.title("This id plot 2")
+#     a,n = table(x)
+#     plt.bar(a, n)
+#     plt.xlabel("Age")
 
 
