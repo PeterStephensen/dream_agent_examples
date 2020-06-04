@@ -111,7 +111,7 @@ Produktionsfunktion:
 \begin_inset Formula 
 \[
 Y_{jt}=\begin{cases}
-\frac{\theta_{jt}}{\alpha}\left(L_{jt}-\overline{L}\right)^{\alpha} & \text{for }L_{jt}\geq\overline{L}\\
+\theta_{jt}\left(L_{jt}-\overline{L}\right)^{\alpha} & \text{for }L_{jt}\geq\overline{L}\\
 0 & \text{\text{for }\ensuremath{L_{jt}\ensuremath{<}\overline{L}}}
 \end{cases}
 \]
@@ -137,7 +137,7 @@ Profit:
 Optimal beskæftigelse:
 \begin_inset Formula 
 \[
-\hat{L}_{jt}=\overline{L}+\left(\frac{w_{jt}}{\overline{p}_{t}\theta_{jt}}\right)^{\frac{1}{\alpha-1}}
+\hat{L}_{jt}=\overline{L}+\left(\alpha\frac{\overline{p}_{t}\theta_{jt}}{w_{jt}}\right)^{\frac{1}{1-\alpha}}
 \]
 
 \end_inset
@@ -150,7 +150,82 @@ hvis
 
 \end_inset
 
+Dette indebærer at
+\begin_inset Formula 
+\[
+\overline{L}\leq\frac{1-\alpha}{\alpha}\left(\frac{1}{\alpha}\frac{w_{jt}}{\overline{p}_{t}\theta_{jt}}\right)^{-\frac{1}{1-\alpha}}
+\]
 
+\end_inset
+
+Definer 
+\begin_inset Formula $\hat{w}_{jt}$
+\end_inset
+
+ ved 
+\begin_inset Formula $\hat{\pi}_{jt}:$
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\hat{w}_{jt}=\xi\overline{p}_{t}\theta_{jt}
+\]
+
+\end_inset
+
+hvor
+\begin_inset Formula 
+\[
+\xi\equiv\frac{\alpha}{\left(\frac{\alpha}{1-\alpha}\overline{L}\right)^{1-\alpha}}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Antagelse om 
+\begin_inset Formula $\theta_{jt}:$
+\end_inset
+
+
+\begin_inset Formula 
+\[
+log\left(\theta_{jt}\right)=log\left(\theta_{j,t-1}\right)+\epsilon_{jt}^{\theta}
+\]
+
+\end_inset
+
+- - - - - - - -
+\begin_inset Formula 
+\[
+\omega_{jt}\equiv
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+w_{jt}=\overline{w}_{t}\left(\frac{\hat{L}_{jt}}{L_{j,t-1}}\right)^{E}
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\hat{L}_{jt}=\overline{L}+\left(\alpha\frac{\overline{p}_{t}\theta_{jt}}{w_{jt}}\right)^{\frac{1}{1-\alpha}}
+\]
+
+\end_inset
+
+- - - - -
 \end_layout
 
 \end_body
