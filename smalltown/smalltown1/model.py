@@ -5,13 +5,11 @@ from datetime import datetime
 import os
 import time
 
-from dream_agent import Agent
+from dream_agent import *
 
-from enums import Event, ECommunication   
-from settings import Settings
-from plots import graphics_init
-from plots import plot1, plot2, plot3
-
+from enums import *   
+from plots import *
+from settings import *
 
 class Household(Agent):
     
@@ -21,6 +19,7 @@ class Household(Agent):
 
     def event_proc(self, id_event):
         if id_event == Event.START: 
+            Settings.number_of_firms
             return
 
         elif id_event == Event.PERIOD_START: 
