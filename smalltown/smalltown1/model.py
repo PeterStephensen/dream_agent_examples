@@ -11,11 +11,17 @@ from enums import *
 from plots import *
 from settings import *
 
+# Usefull functions
+def exist(x):
+    return x is not None
+
 class Household(Agent):
     
     def __init__(self, parent=None): # Important to add default values. Here age=0
         super().__init__(parent)
         self._firm=None
+        self._wage_last_period=0
+        self._wage=0
 
     def event_proc(self, id_event):
         if id_event == Event.START: 
@@ -23,34 +29,62 @@ class Household(Agent):
             return
 
         elif id_event == Event.PERIOD_START: 
+            if exist(self._firm):
+                self._wage = self._firm.wage
             return
 
         elif id_event == Event.UPDATE:
-            return                
+            no_job = self._firm is None
+            have_job = not no_job
+            random_search = random.random() < Settings.household_probability_search  
+            
+            decreasing_wage=False
+            if have_job:
+                decreasing_wage = self._firm.wage < self._wage_last_period  
 
-        elif id_event == Event.PERIOD_STOP:
-            if self._firm is None: # No job
-                # Search  
-                w , fm = [], []  
-                for f in Simulation.firms.get_random_agents(n=Settings.household_search_number_of_firms):
-                    if f.vacancies>0:
-                        w.append(f.wage)
-                        fm.append(f)
+            if no_job or random_search or decreasing_wage: 
+                new_firm = self.search_job()
 
-                new_firm=None
-                if len(w)>0:
-                    new_firm = fm[w.index(max(w))] 
-
-                # If found a firm
+                # If found a potential firm
                 if new_firm is not None:
-                    if new_firm.communicate(ECommunication.DO_YOU_HAVE_A_JOB, self)==ECommunication.YES:
-                        self._firm = new_firm
+                    better_wage = False
+                    if have_job: # If have job
+                        if new_firm.wage > self._firm.wage:
+                            better_wage = True
 
+                    if no_job or better_wage:
+                        if new_firm.communicate(ECommunication.DO_YOU_HAVE_A_JOB, self)==ECommunication.YES:
+                            if have_job:
+                                self._firm.communicate(ECommunication.I_QUIT, self)
+                            self._firm = new_firm
+            
+            if self._firm is not None: # Remember wage
+                self._wage_last_period = self._firm.wage                 
+            
             return
 
+        elif id_event == Event.PERIOD_STOP:
+            return
+
+
     def communicate(self, e_communication, person):
-        if e_communication==ECommunication.HI:
-            return ECommunication.HI
+        if e_communication==ECommunication.YOU_ARE_FIRED:
+            self._firm=None
+            return ECommunication.OK
+
+    def search_job(self):
+        """Returns None or a firm with a vacant job."""
+        wages , firms = [], []  
+        for f in Simulation.firms.get_random_agents(n=Settings.household_search_number_of_firms):
+            if f.vacancies>0:
+                wages.append(f.wage)
+                firms.append(f)
+
+        new_firm=None
+        if len(wages)>0:
+            new_firm = firms[wages.index(max(wages))] 
+        
+        return new_firm             
 
 
 class Firm(Agent):
@@ -64,35 +98,68 @@ class Firm(Agent):
 
         self._employees = []
         self._vacancies=0
+        self._reserve = Settings.firm_start_capital
+        self._employed_start=0
+        self._profit=0
+        self._production=0
+        self._default=False
 
         # Random initial productivity
         self._theta = math.exp(random.gauss(Settings.firm_log_theta_initial_mean, Settings.firm_log_theta_initial_sd))
         
         # Calculate profit at the mean wage in the economy
-        L_hat, Y_hat, profit_hat = self.calc_variables()
-        if profit_hat > 0:
-            self._vacancies = L_hat
-        else:
-            self.remove_this_agent() # If negative initial profit: productivity too low to live!
+        # L_hat, Y_hat, profit_hat = self.calc_variables()
+        # if profit_hat > 0:
+        #     self._vacancies = L_hat
+        # else:
+        #     self.remove_this_agent() # If negative initial profit: productivity too low to live!
 
     def event_proc(self, id_event):
         if id_event == Event.START: 
             return
 
         elif id_event == Event.PERIOD_START: 
+            self._employed_start = len(self._employees)
             return
 
         elif id_event == Event.UPDATE:
+            if self._default:
+                for h in self._employees:
+                    h.communicate(ECommunication.YOU_ARE_FIRED, self)
+                self.remove_this_agent()
+
             return
    
         elif id_event == Event.PERIOD_STOP:
-            alpha = Settings.firm_alpha
-            p_bar = Simulation.price_bar
-            L_bar = Settings.firm_min_employment
+            if self._default:
+                self.remove_this_agent()
+                return
 
-            L_hat = L_bar + (alpha*p_bar*self._theta/self._wage)**(1/(1-alpha))
-            Y_hat = self._theta * (L_hat - L_bar)**alpha
-            profit_hat = p_bar * Y_hat - self._wage * L_hat 
+            alpha = Settings.firm_alpha
+            p     = Simulation.price
+            L_min = Settings.firm_min_employment
+            r     = Simulation.interest_rate
+
+            # Observe: Production in the period is done by folks employed in the start of the period.
+            # If an employed quits during the period he works to the end of the period.
+            if self._employed_start >= L_min:
+                self._production = self._theta * (self._employed_start - L_min) ** alpha
+
+            # Observe: Firm pay wage to peoples employed in the start of the period (self._employed_start)
+            self._profit = p * self._production - self._wage * self._employed_start
+
+            self._reserve = (1 + r) * self._reserve + self._profit 
+
+            # If negative reserves: DEFAULT!
+            if self._reserve < 0:
+                self._default=True
+                return
+
+
+
+            # L_hat = L_bar + (alpha*p_bar*self._theta/self._wage)**(1/(1-alpha))
+            # Y_hat = self._theta * (L_hat - L_bar)**alpha
+            # profit_hat = p_bar * Y_hat - self._wage * L_hat 
 
             # Random death. Just for testing
             # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -104,8 +171,9 @@ class Firm(Agent):
             return
 
     def calc_variables(self):
+        """Calculates tuple: L_hat, Y_hat, profit_hat"""
         alpha = Settings.firm_alpha
-        p_bar = Simulation.price_bar
+        p_bar = Simulation.price
         L_bar = Settings.firm_min_employment
 
         L_hat = L_bar + (alpha*p_bar*self._theta/self._wage)**(1/(1-alpha))
@@ -123,6 +191,10 @@ class Firm(Agent):
                 self._employees.append(household)
             return ECommunication.YES
 
+        elif e_communication==ECommunication.I_QUIT:
+            self._employees.remove(household)
+            return ECommunication.OK
+    
 
     @property
     def wage(self):
@@ -130,11 +202,13 @@ class Firm(Agent):
 
     @property
     def vacancies(self):
+        """Number of vacancies"""
         return self._vacancies
 
 
     @property
     def theta(self):
+        """Firms individual productivity. Follows a random walk"""
         return self._theta
 
 class Statistics(Agent):
@@ -204,7 +278,8 @@ class Simulation(Agent):
     time=-1 # If time=-1 the model has not started yet.
     households=None
     firms=None
-    price_bar=1  # The exogeneous international good price
+    price=1  # The exogeneous international good price
+    interest_rate = Settings.interest_rate
 
     def __init__(self):
         super().__init__()

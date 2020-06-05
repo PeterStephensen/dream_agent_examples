@@ -10,8 +10,7 @@ def graphics_init():
     plt.figure(figsize=[15,10])
 
 def plot1(x):  
-    """Plotting number of firms
-    """
+    """Plotting time series of number of firms"""
     plt.subplot(PLOT_ROW,PLOT_COL, 1)
     #plt.title("This is plot 1")
     plt.plot(x)
@@ -21,8 +20,7 @@ def plot1(x):
     plt.ylim(0, 2*Settings.number_of_firms) 
 
 def plot2(x):  
-    """Histogram for productivity
-    """
+    """Histogram of productivity"""
     plt.subplot(PLOT_ROW,PLOT_COL, 2)
     #plt.title("distribution")
     plt.hist(x, bins=15)
@@ -30,8 +28,7 @@ def plot2(x):
     plt.xlim(0, 2) 
     
 def plot3(x):  
-    """Plotting mean_wage
-    """
+    """Plotting times series of mean_wage"""
     plt.subplot(PLOT_ROW,PLOT_COL, 3)
     #plt.title("This is plot 1")
     plt.plot(x)

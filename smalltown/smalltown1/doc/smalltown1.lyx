@@ -94,12 +94,34 @@ Husholdningerne
 \end_layout
 
 \begin_layout Standard
-Meget simple.
- Hvis arbejdsløse søges 
-\begin_inset Formula $n$
-\end_inset
+Husholdningernes centrale opgave i modellen er at udbyde arbejdskraft og
+ modtage løn.
+ Lønnen brugers til at købe varer der typisk er produceret udenfor byen
+ og eventuel opsparing sættes i ikke-lokale aktiver.
+ Husholdningen antages at bestå af en person.
+ 
+\end_layout
 
- jobs.
+\begin_layout Standard
+Hvis husholdningen er arbejdsløs igangsættes en søgeproces.
+ Et givent antal tilfældige virksomheder kontaktes.
+ Bland de virksomheder der har ledige stillinger vælges den der tilbyder
+ den højeste løn.
+ Bemærk at husholdningen søger blandt alle virksomheder - ikke kun dem der
+ har ledige stillinger.
+ Dette er en simpel (og ikke helt realistisk) søge-teknologi med flere gode
+ egenskaber.
+ Den er nem at implementere og sandsynligheden for at få et job kommer halt
+ automatisk til at afhænge af hvor mange virksomheder der efterspørger arbejdskr
+aft.
+ 
+\end_layout
+
+\begin_layout Standard
+Når husholdningen er beskæftiget vil den også af og til igangsætte en søgeproces.
+ Dette sker med en bestemt lav attention focus sandsynlighed og hvis virksomhede
+n husholdningen er ansat i sætter lønnen ned.
+ 
 \end_layout
 
 \begin_layout Section
@@ -107,42 +129,51 @@ Virksomhederne
 \end_layout
 
 \begin_layout Standard
-Produktionsfunktion:
+Den enkelte virksomhed har en S-formet produktionsfunktion, således at der
+ er stigende skalaafkast i starten men aftagende skalaafkast ved høj produktion:
 \begin_inset Formula 
 \[
 Y_{jt}=\begin{cases}
-\theta_{jt}\left(L_{jt}-\overline{L}\right)^{\alpha} & \text{for }L_{jt}\geq\overline{L}\\
-0 & \text{\text{for }\ensuremath{L_{jt}\ensuremath{<}\overline{L}}}
+\theta_{jt}\left(L_{jt}-L^{\text{min}}\right)^{\alpha} & \text{for }L_{jt}\geq L^{\text{min}}\\
+0 & \text{\text{for }\ensuremath{L_{jt}\ensuremath{<}L^{\text{min}}}}
 \end{cases}
 \]
 
 \end_inset
 
-Prisen 
+Dette betyder at den enkelte virksomhed har en optimal størrelse.
+ 
+\end_layout
+
+\begin_layout Standard
+Virksomheden sælger til et indternationalt mearked med en eksogene pris
+ pris 
 \begin_inset Formula $\overline{p}_{t}$
 \end_inset
 
  er eksogen.
-\end_layout
-
-\begin_layout Standard
-Profit:
+ Profitten er derfor givet ved:
 \begin_inset Formula 
 \[
-\pi_{jt}=\overline{p}_{t}Y_{jt}-w_{jt}L_{jt}
+\pi_{jt}=\overline{p}_{t}Y_{jt}-w_{jt}L_{jt},
 \]
 
 \end_inset
 
-Optimal beskæftigelse:
+hvor 
+\begin_inset Formula $w_{jt}$
+\end_inset
+
+ er lønnen.
+ Den optimale optimale beskæftigelse er derfor givet ved:
 \begin_inset Formula 
 \[
-\hat{L}_{jt}=\overline{L}+\left(\alpha\frac{\overline{p}_{t}\theta_{jt}}{w_{jt}}\right)^{\frac{1}{1-\alpha}}
+\hat{L}_{jt}=L^{\text{min}}+\left(\alpha\frac{\overline{p}_{t}\theta_{jt}}{w_{jt}}\right)^{\frac{1}{1-\alpha}}
 \]
 
 \end_inset
 
-hvis
+Virksomheden vil producere hvis
 \begin_inset Formula 
 \[
 \hat{\pi}_{jt}=\overline{p}_{t}\hat{Y}_{jt}-w_{jt}\hat{L}_{jt}\geq0
@@ -153,31 +184,78 @@ hvis
 Dette indebærer at
 \begin_inset Formula 
 \[
-\overline{L}\leq\frac{1-\alpha}{\alpha}\left(\frac{1}{\alpha}\frac{w_{jt}}{\overline{p}_{t}\theta_{jt}}\right)^{-\frac{1}{1-\alpha}}
+L^{\text{min}}\leq\frac{1-\alpha}{\alpha}\left(\frac{1}{\alpha}\frac{\overline{p}_{t}\theta_{jt}}{w_{jt}}\right)^{\frac{1}{1-\alpha}}
 \]
 
 \end_inset
 
-Definer 
-\begin_inset Formula $\hat{w}_{jt}$
+Det ses at virksomheden vil producere hvis 
+\begin_inset Formula $\overline{p}_{t}\theta_{jt}$
 \end_inset
 
- ved 
-\begin_inset Formula $\hat{\pi}_{jt}:$
+ er stor nok relativt til lønnen 
+\begin_inset Formula $w_{jt},$
 \end_inset
 
+ dvs.
+ hvis den får en tilstækkelig høj pris og er tilstrækkelig produktiv.
+ 
+\end_layout
 
+\begin_layout Standard
+Vi antager at 
+\begin_inset Formula $log\left(\theta_{jt}\right)$
+\end_inset
+
+ følger en random walk:
 \begin_inset Formula 
 \[
-\hat{w}_{jt}=\xi\overline{p}_{t}\theta_{jt}
+log\left(\theta_{jt}\right)=log\left(\theta_{j,t-1}\right)+\epsilon_{jt}^{\theta},\,\epsilon_{jt}^{\theta}\sim N\left(0,\sigma_{\theta}^{2}\right)
 \]
 
 \end_inset
 
-hvor
+Virksomhederne må hele tiden reagere på makro-stød til 
+\begin_inset Formula $\overline{p}_{t}$
+\end_inset
+
+ og mikro-stød til 
+\begin_inset Formula $\theta_{jt}$
+\end_inset
+
+.
+ Virksomheden bestemmer selv lønnen 
+\begin_inset Formula $w_{jt}.$
+\end_inset
+
+ Vi antager at virksomheden forstår at hvis den sætter lønne lavere end
+ gennemsnitslønnen vil den miste medarbejdre og hvis den sætter lønnen højere
+ end gennemsnitslønnen vil den få flere ansøgninger.
+\end_layout
+
+\begin_layout Standard
+Vi antager at virksomheden har et estimat for gennemsnitslønnen 
+\begin_inset Formula $\overline{w}_{t}$
+\end_inset
+
+.
+ Dette er en central social antagelse om at der flyder aggregeret data fra
+ markedet til den enkelte agent.
+ Man kan forestille sig at virksomheden selv samler data for at estimere
+ 
+\begin_inset Formula $\overline{w}_{t}$
+\end_inset
+
+ eller at der er en central instans der står for estimatet.
+ Vi antager det sidste.
+\end_layout
+
+\begin_layout Standard
+Virksomheden kan beregne sin optimale beskæftigelse hvis den betaler gennemsnits
+lønnen: 
 \begin_inset Formula 
 \[
-\xi\equiv\frac{\alpha}{\left(\frac{\alpha}{1-\alpha}\overline{L}\right)^{1-\alpha}}
+\overline{L}_{jt}=L^{\text{min}}+\left(\alpha\frac{\overline{p}_{t}\theta_{jt}}{\overline{w}_{t}}\right)^{\frac{1}{1-\alpha}}
 \]
 
 \end_inset
@@ -186,46 +264,213 @@ hvor
 \end_layout
 
 \begin_layout Standard
-Antagelse om 
-\begin_inset Formula $\theta_{jt}:$
+og beregne den hertil svarende profit 
+\begin_inset Formula $\overline{\pi}_{t}.$
 \end_inset
 
+ Hvis 
+\begin_inset Formula $\overline{\pi}_{t}\geq0$
+\end_inset
 
+ betyder det at virksomheden er tilstrækkelig produktiv til at agere på
+ det aktuelle marked.
+ Hvis 
+\begin_inset Formula $\overline{\pi}_{t}<0$
+\end_inset
+
+ er virksomheden tvunget til at fyre medarbejdere eller sætte lønnen lavere
+ end gennemsnittet, og således gradvist miste sine medarbejdere.
+ 
+\end_layout
+
+\begin_layout Standard
+Virksomheden har en dynamisk budgetrestriktion:
 \begin_inset Formula 
 \[
-log\left(\theta_{jt}\right)=log\left(\theta_{j,t-1}\right)+\epsilon_{jt}^{\theta}
+V_{jt}=\left(1+r_{t}\right)V_{j,t-1}+\pi_{jt},\,V_{j0}=\overline{V}_{0}
 \]
 
 \end_inset
 
-- - - - - - - -
-\begin_inset Formula 
-\[
-\omega_{jt}\equiv
-\]
-
+hvor 
+\begin_inset Formula $V_{jt}$
 \end_inset
 
+ er reserver og 
+\begin_inset Formula $\overline{V}_{0}$
+\end_inset
 
+ er en startkapital alle nye virksomheder besider (vi forklarer ikke hvor
+ den kommer fra).
+ Hvis 
+\begin_inset Formula $V_{jt}<0$
+\end_inset
+
+ går virksomheden fallit.
+ Når virksomheden går fallit forsvinder den og alle medarbejdere fyres.
+\end_layout
+
+\begin_layout Standard
+Vi antager at virksomheden vælger løn 
+\begin_inset Formula $w_{jt}$
+\end_inset
+
+ og ønsket beskæftigelse 
+\begin_inset Formula $\hat{L}_{jt}$
+\end_inset
+
+ ved at løse følgende ikke-lineære system:
 \end_layout
 
 \begin_layout Standard
 \begin_inset Formula 
-\[
-w_{jt}=\overline{w}_{t}\left(\frac{\hat{L}_{jt}}{L_{j,t-1}}\right)^{E}
-\]
+\begin{equation}
+\hat{L}_{jt}=L^{\text{min}}+\left(\alpha\frac{\overline{p}_{t}\theta_{jt}}{w_{jt}}\right)^{\frac{1}{1-\alpha}}\label{eq:L-bar}
+\end{equation}
 
 \end_inset
 
 
 \begin_inset Formula 
-\[
-\hat{L}_{jt}=\overline{L}+\left(\alpha\frac{\overline{p}_{t}\theta_{jt}}{w_{jt}}\right)^{\frac{1}{1-\alpha}}
-\]
+\begin{equation}
+w_{jt}=\overline{w}_{t}\left(\frac{\hat{L}_{jt}}{L_{j,t-1}}\right)^{E}\label{eq:w}
+\end{equation}
 
 \end_inset
 
-- - - - -
+Den første ligning bestemmer den optimale beskæftigelse givet lønnen 
+\begin_inset Formula $w_{jt}.$
+\end_inset
+
+ Den anden ligning bestemmer virksomhedens lønfastsættelse.
+ Hvis 
+\begin_inset Formula $\hat{L}_{jt}>L_{j,t-1}$
+\end_inset
+
+ ønsker virksomheden at tiltrække nye medarbejdere.
+ Den sætter derfor lønnen højere end gennemsnitslønnen 
+\begin_inset Formula $\overline{w}_{t}.$
+\end_inset
+
+ Hvis omvendt 
+\begin_inset Formula $\hat{L}_{jt}<L_{j,t-1}$
+\end_inset
+
+ sætter virksomheden en løn lavere end gennemsnittet.
+ Værdien af 
+\begin_inset Formula $E$
+\end_inset
+
+ bestemmer hvor kraftig virksomhedens lønreaktion er.
+ Det er oplagt at lade denne parameter være bestemt af fælles erfaringer.
+ 
+\end_layout
+
+\begin_layout Standard
+Hvis 
+\begin_inset Formula $E<1$
+\end_inset
+
+ kan man løse systemet (
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:L-bar"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+)-(
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:w"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+) ved en iterativ proces.
+ Føste sætte man 
+\begin_inset Formula $w_{jt}=\overline{w}_{t}.$
+\end_inset
+
+ Herefter beregnes 
+\begin_inset Formula $\hat{L}_{jt}$
+\end_inset
+
+ fra (
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:L-bar"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+).
+ Denne indsættes i (
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:w"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+) hvorved 
+\begin_inset Formula $w_{jt}$
+\end_inset
+
+ beregnes.
+ Denne indsættes i (
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:L-bar"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+) osv.
+ osv.
+ Systemet konvergerer meget hurtigt.
+\end_layout
+
+\begin_layout Standard
+Hvis 
+\begin_inset Formula $\hat{L}_{jt}>L_{j,t-1}$
+\end_inset
+
+ slåes 
+\begin_inset Formula $V_{jt}=\hat{L}_{jt}-L_{j,t-1}$
+\end_inset
+
+ stillinger op.
+ Hvis 
+\begin_inset Formula $\hat{L}_{jt}<L_{j,t-1}$
+\end_inset
+
+ fyres 
+\begin_inset Formula $F_{jt}=\varphi\left(L_{j,t-1}-\hat{L}_{jt}\right)$
+\end_inset
+
+.
+ Bemærk at 
+\begin_inset Formula $\varphi<1$
+\end_inset
+
+ muliggør at ikke alle fyres.
+ Denne parameter bestemmes ligesom 
+\begin_inset Formula $E$
+\end_inset
+
+ ud fra erfaringer der deles mellem virksomhederne.
+ 
 \end_layout
 
 \end_body

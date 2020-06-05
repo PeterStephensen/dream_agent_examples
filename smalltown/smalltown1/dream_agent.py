@@ -3,8 +3,7 @@ import sys
 import numpy as np
 
 class Agent:
-    """Class used for agent based modelling and microsimulation
-    """
+    """Class used for agent based modelling and microsimulation by DREAM (www.dreamgruppen.dk)."""
     _nAgents = 0
 
     def __init__(self, parent=None):

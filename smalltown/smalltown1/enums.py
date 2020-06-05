@@ -5,9 +5,9 @@ from enum import Enum
 class Event(Enum):
     START = 0         # The model starts
     STOP = 1          # The model stops
-    PERIOD_START = 2  # The start of a period. Statistics makes statistics
-    PERIOD_STOP = 3   # The end of a period. Agents calculate utility and profits
-    UPDATE = 4        # Stuff that happens in the period
+    PERIOD_START = 2  # The start of a period. Statistics makes statistics. Initialize flow-counters
+    UPDATE = 3        # Stuff that happens in the period
+    PERIOD_STOP = 4   # The end of a period. Agents calculate utility and profits. Sum up the flows
 
 # Communication
 #---------------------------
