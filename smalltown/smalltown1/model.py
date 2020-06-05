@@ -11,7 +11,7 @@ from enums import *
 from plots import *
 from settings import *
 
-# Usefull functions
+# Usefull function
 def exist(x):
     return x is not None
 
@@ -34,8 +34,8 @@ class Household(Agent):
             return
 
         elif id_event == Event.UPDATE:
-            no_job = self._firm is None
-            have_job = not no_job
+            have_job = exist(self._firm)
+            no_job = not have_job 
             random_search = random.random() < Settings.household_probability_search  
             
             decreasing_wage=False
@@ -46,7 +46,7 @@ class Household(Agent):
                 new_firm = self.search_job()
 
                 # If found a potential firm
-                if new_firm is not None:
+                if exist(new_firm):
                     better_wage = False
                     if have_job: # If have job
                         if new_firm.wage > self._firm.wage:
@@ -58,7 +58,7 @@ class Household(Agent):
                                 self._firm.communicate(ECommunication.I_QUIT, self)
                             self._firm = new_firm
             
-            if self._firm is not None: # Remember wage
+            if exist(self._firm): # Remember wage
                 self._wage_last_period = self._firm.wage                 
             
             return
