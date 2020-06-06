@@ -25,6 +25,6 @@ class Settings():
     graphics_file = "smalltown//smalltown1//plots//pic.png"
 
     interest_rate = 0.05
-    price = 10 # The exogeneous international good price
+    price = 1 # The exogeneous international good price
 
     number_of_periods = 500

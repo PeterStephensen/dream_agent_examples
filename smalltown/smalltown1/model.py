@@ -65,7 +65,7 @@ class Household(Agent):
             return
 
 
-    def communicate(self, e_communication, person):
+    def communicate(self, e_communication, firm):
         if e_communication==ECommunication.YOU_ARE_FIRED:
             self._firm=None
             return ECommunication.OK
@@ -84,7 +84,7 @@ class Household(Agent):
 
 class Firm(Agent):
     
-    def __init__(self, parent=None, age=0): # Important to add default values. Here age=0
+    def __init__(self, parent=None): # Important to add default values. Here age=0
         super().__init__(parent)
         if Simulation.time==-1:  # The model has not started yet
             self._wage = math.exp(random.gauss(Settings.firm_init_wage_mean, Settings.firm_init_wage_sd))   
@@ -122,10 +122,6 @@ class Firm(Agent):
             return
    
         elif id_event == Event.PERIOD_STOP:
-            if self._default:
-                self.remove_this_agent()
-                return
-
             alpha = Settings.firm_alpha
             zeta  = Settings.firm_reserve_target_wagesum_parameter
             gamma = Settings.firm_buffer_stock_speed
@@ -133,8 +129,9 @@ class Firm(Agent):
             L_min = Settings.firm_min_employment
             r     = Simulation.interest_rate
 
-
-
+            if Simulation.time>20:
+                zz=22
+            
             # Observe: Production in the period is done by folks employed in the start of the period.
             # If an employed quits during the period he works to the end of the period.
             if self._employed_start >= L_min:
@@ -300,6 +297,7 @@ class Statistics(Agent):
                 plot4(self._ts_n_employed)
                 plot5(profit)
                 plot6(reserve)
+                plot7(wage)
                 plt.show()
 
                 if show_pic and not last_periode: 

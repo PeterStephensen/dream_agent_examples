@@ -3,11 +3,11 @@ from settings import Settings
 from tools import table
 
 PLOT_ROW = 2
-PLOT_COL = 3
+PLOT_COL = 4
 
 def graphics_init():
     plt.ion()   # Necessary to get animation effect 
-    plt.figure(figsize=[15,10])
+    plt.figure(figsize=[17,10])
 
 def plot1(x):  
     """Plotting time series of number of firms"""
@@ -35,7 +35,7 @@ def plot3(x):
     plt.xlabel("Periods")
     plt.ylabel("Mean wage")
     plt.xlim(0, Settings.number_of_periods) 
-    plt.ylim(0, 2) 
+    # plt.ylim(0, 2) 
 
 def plot4(x):  
     """Plotting time series of number of employed in the economy"""
@@ -61,6 +61,14 @@ def plot6(x):
     #plt.title("distribution")
     plt.hist(x, bins=15)
     plt.xlabel("Reserve")
+    # plt.xlim(0, 2) 
+
+def plot7(x):  
+    """Histogram of wage"""
+    plt.subplot(PLOT_ROW,PLOT_COL, 7)
+    #plt.title("distribution")
+    plt.hist(x, bins=15)
+    plt.xlabel("Wage")
     # plt.xlim(0, 2) 
 
 # def plot3(x):  
