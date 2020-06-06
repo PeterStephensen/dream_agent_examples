@@ -10,10 +10,8 @@ from dream_agent import *
 from enums import *   
 from plots import *
 from settings import *
+from tools import exist
 
-# Usefull function
-def exist(x):
-    return x is not None
 
 class Household(Agent):
     
@@ -34,14 +32,14 @@ class Household(Agent):
             return
 
         elif id_event == Event.UPDATE:
-            have_job = exist(self._firm)
-            no_job = not have_job 
-            random_search = random.random() < Settings.household_probability_search  
+            have_job        = exist(self._firm)
+            no_job          = not have_job 
+            random_search   = random.random() < Settings.household_probability_search             
             
-            decreasing_wage=False
-            if have_job:
-                decreasing_wage = self._firm.wage < self._wage_last_period  
-
+            decreasing_wage = False
+            if exist(self._firm):
+                decreasing_wage = True if self._firm.wage < self._wage_last_period else False
+            
             if no_job or random_search or decreasing_wage: 
                 new_firm = self.search_job()
 
@@ -80,10 +78,7 @@ class Household(Agent):
                 wages.append(f.wage)
                 firms.append(f)
 
-        new_firm=None
-        if len(wages)>0:
-            new_firm = firms[wages.index(max(wages))] 
-        
+        new_firm = firms[wages.index(max(wages))] if len(wages)>0 else None       
         return new_firm             
 
 
@@ -97,23 +92,20 @@ class Firm(Agent):
             self._wage = Simulation.statistics.mean_wage
 
         self._employees = []
-        self._vacancies=0
-        self._reserve = Settings.firm_start_capital
+        self._vacancies=10
+        self._reserve = 0
+        self._reserve_target=0
+        self._withdrawal=0
         self._employed_start=0
         self._profit=0
         self._production=0
         self._default=False
 
         # Random initial productivity
-        self._theta = math.exp(random.gauss(Settings.firm_log_theta_initial_mean, Settings.firm_log_theta_initial_sd))
+        mean = Settings.firm_log_theta_initial_mean
+        sd   = Settings.firm_log_theta_initial_sd
+        self._theta = math.exp(random.gauss(mean, sd))
         
-        # Calculate profit at the mean wage in the economy
-        # L_hat, Y_hat, profit_hat = self.calc_variables()
-        # if profit_hat > 0:
-        #     self._vacancies = L_hat
-        # else:
-        #     self.remove_this_agent() # If negative initial profit: productivity too low to live!
-
     def event_proc(self, id_event):
         if id_event == Event.START: 
             return
@@ -127,7 +119,6 @@ class Firm(Agent):
                 for h in self._employees:
                     h.communicate(ECommunication.YOU_ARE_FIRED, self)
                 self.remove_this_agent()
-
             return
    
         elif id_event == Event.PERIOD_STOP:
@@ -136,53 +127,86 @@ class Firm(Agent):
                 return
 
             alpha = Settings.firm_alpha
+            zeta  = Settings.firm_reserve_target_wagesum_parameter
+            gamma = Settings.firm_buffer_stock_speed
             p     = Simulation.price
             L_min = Settings.firm_min_employment
             r     = Simulation.interest_rate
+
+
 
             # Observe: Production in the period is done by folks employed in the start of the period.
             # If an employed quits during the period he works to the end of the period.
             if self._employed_start >= L_min:
                 self._production = self._theta * (self._employed_start - L_min) ** alpha
+            else:
+                self._production = 0
 
             # Observe: Firm pay wage to peoples employed in the start of the period (self._employed_start)
             self._profit = p * self._production - self._wage * self._employed_start
 
-            self._reserve = (1 + r) * self._reserve + self._profit 
+            self._reserve_target = zeta * self._wage * self._employed_start
+            buffer_stock_saving = gamma * (self._reserve_target - self._reserve) - r * self._reserve
+
+            if self._profit < 0:
+                self._saving = self._profit
+            else:
+                self._saving = self._profit if self._profit < buffer_stock_saving else buffer_stock_saving
+
+            self._withdrawal = self._profit - buffer_stock_saving if self._profit > buffer_stock_saving else 0
+
+            self._reserve = (1 + r) * self._reserve + self._saving 
 
             # If negative reserves: DEFAULT!
-            if self._reserve < 0:
+            if self._reserve < Settings.firm_credit_limit:
                 self._default=True
                 return
 
+            # Chooses wage and employment
+            self._wage, L_hat = self.calc_variables()
 
+            nL_hat = math.floor(L_hat)
+            nL = len(self._employees) 
+            if nL_hat > nL:        # Hire
+                self._vacancies = nL_hat - nL  
+            elif nL_hat < nL:      # Fire  
+                self._vacancies=0
 
-            # L_hat = L_bar + (alpha*p_bar*self._theta/self._wage)**(1/(1-alpha))
-            # Y_hat = self._theta * (L_hat - L_bar)**alpha
-            # profit_hat = p_bar * Y_hat - self._wage * L_hat 
-
-            # Random death. Just for testing
-            # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-            if random.random() < 0.005:
-                self.remove_this_agent()
-
+            
             epsilon = random.gauss(Settings.firm_log_theta_error_mean, Settings.firm_log_theta_error_sd)
             self._theta = math.exp(math.log(self._theta) + epsilon)          
             return
 
     def calc_variables(self):
-        """Calculates tuple: L_hat, Y_hat, profit_hat"""
+        """Calculates wage and optimal employment L_hat
+
+        Returns:
+            tuple: wage, L_hat. If no employment: Returns w_bar and optimal L_hat given w=w_bar 
+        """
         alpha = Settings.firm_alpha
-        p_bar = Simulation.price
-        L_bar = Settings.firm_min_employment
+        E = Settings.firm_wage_reaction
+        p = Simulation.price
+        L_min = Settings.firm_min_employment
+        w_bar = Simulation.statistics.mean_wage
+        L0 = len(self._employees)
 
-        L_hat = L_bar + (alpha*p_bar*self._theta/self._wage)**(1/(1-alpha))
-        Y_hat = self._theta * (L_hat - L_bar)**alpha
-        profit_hat = p_bar * Y_hat - self._wage * L_hat 
+        if L0==0: # If no employment: Returns w_bar and optimal L_hat given w=w_bar 
+            w = w_bar
+            L_hat = L_min + (alpha*p*self._theta/w)**(1/(1-alpha))                
+            return w, L_hat
 
-       
-        
-        return L_hat, Y_hat, profit_hat
+        # Iterations
+        L_hat0, itt = 0, 0
+        w = w_bar # Start value
+        for _ in range(Settings.firm_calc_variables_max_iterations):
+            L_hat = L_min + (alpha*p*self._theta/w)**(1/(1-alpha))                
+            w = w_bar * (L_hat / L0) ** E
+            if abs(L_hat-L_hat0) < Settings.firm_calc_variables_error_ok:
+                break
+            L_hat0 = L_hat
+            itt += 1                    
+
+        return w, L_hat
 
     def communicate(self, e_communication, household):
         if e_communication==ECommunication.DO_YOU_HAVE_A_JOB:
@@ -205,11 +229,26 @@ class Firm(Agent):
         """Number of vacancies"""
         return self._vacancies
 
+    @property
+    def employment(self):
+        """Number of employed"""
+        return len(self._employees)
 
     @property
     def theta(self):
         """Firms individual productivity. Follows a random walk"""
         return self._theta
+
+    @property
+    def profit(self):
+        """Firms profit"""
+        return self._profit
+
+    @property
+    def reserve(self):
+        """Firms reserve"""
+        return self._reserve
+
 
 class Statistics(Agent):
     
@@ -218,24 +257,37 @@ class Statistics(Agent):
             graphics_init() # Initialize graphics
             self._ts_n_households = []
             self._ts_n_firms = []
+            self._ts_n_employed = []
             self._ts_mean_wage = []
 
             self._time = None
             self._time_total = time.time()
-            self._mean_wage=1
+            self._mean_wage=1.0
 
         elif id_event == Event.PERIOD_START:
             # Collect data
             self._ts_n_households.append(len(Simulation.households))
             self._ts_n_firms.append(len(Simulation.firms))
 
-            wage = [f.wage for f in Simulation.firms] 
-            theta = [f.theta for f in Simulation.firms] 
+            wage = [] 
+            theta = [] 
+            profit = [] 
+            reserve = []            
+            L_sum=0 
+
+            for f in Simulation.firms:
+                if exist(f.wage): 
+                    wage.append(f.wage)
+                theta.append(f.theta)
+                profit.append(f.profit)
+                reserve.append(f.reserve)
+                L_sum += f.employment
+
             if len(wage)>0:
                 self._mean_wage = sum(wage)/len(wage)
 
             self._ts_mean_wage.append(self._mean_wage)
-
+            self._ts_n_employed.append(L_sum)
 
             # Show real time graphics (every graphics_periods_per_pic periode)
             show_pic     = Simulation.time % Settings.graphics_periods_per_pic==0
@@ -245,6 +297,9 @@ class Statistics(Agent):
                 plot1(self._ts_n_firms)
                 plot2(theta)
                 plot3(self._ts_mean_wage)
+                plot4(self._ts_n_employed)
+                plot5(profit)
+                plot6(reserve)
                 plt.show()
 
                 if show_pic and not last_periode: 
@@ -278,7 +333,7 @@ class Simulation(Agent):
     time=-1 # If time=-1 the model has not started yet.
     households=None
     firms=None
-    price=1  # The exogeneous international good price
+    price = Settings.price  # The exogeneous international good price
     interest_rate = Settings.interest_rate
 
     def __init__(self):

@@ -16,6 +16,18 @@ def table(x):
     c = Counter(x)
     return list(c), list(c.values())
 
+# Usefull function
+def exist(x):
+    """Tests whether an object is allocated
+
+    Args:
+        x (object): Any object
+
+    Returns:
+        bool: True if 'not None'
+    """
+    return x is not None
+
 
 # Poor man's loess. Fine and quick if many data points 
 def local_mean(x,y, n=10):

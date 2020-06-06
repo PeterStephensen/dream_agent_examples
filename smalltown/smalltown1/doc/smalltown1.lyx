@@ -287,27 +287,73 @@ og beregne den hertil svarende profit
 Virksomheden har en dynamisk budgetrestriktion:
 \begin_inset Formula 
 \[
-V_{jt}=\left(1+r_{t}\right)V_{j,t-1}+\pi_{jt},\,V_{j0}=\overline{V}_{0}
+V_{jt}=\left(1+r_{t}\right)V_{j,t-1}+s_{jt},\,V_{j0}=0
 \]
 
 \end_inset
 
 hvor 
+\begin_inset Formula $s_{jt}$
+\end_inset
+
+ er virksomhedens opsparing og 
 \begin_inset Formula $V_{jt}$
 \end_inset
 
- er reserver og 
-\begin_inset Formula $\overline{V}_{0}$
+ er reserver.
+ Virksomheden starter uden reserver men har en kredit-grænse 
+\begin_inset Formula $C^{\text{limit}}<0.$
 \end_inset
 
- er en startkapital alle nye virksomheder besider (vi forklarer ikke hvor
- den kommer fra).
  Hvis 
-\begin_inset Formula $V_{jt}<0$
+\begin_inset Formula $V_{jt}<C^{\text{limit}}$
 \end_inset
 
  går virksomheden fallit.
  Når virksomheden går fallit forsvinder den og alle medarbejdere fyres.
+\end_layout
+
+\begin_layout Standard
+Virksomheden vælger sin opsparing ud fra en buffer-stock-tankegang:
+\begin_inset Formula 
+\begin{equation}
+s_{jt}=\begin{cases}
+\pi_{jt} & \text{for }\pi_{jt}<0\\
+\text{min}\left\{ \pi_{jt},\gamma\left(V_{jt}^{*}-V_{j,t-1}\right)\right\}  & \text{for }\pi_{jt}\geq0
+\end{cases}\label{eq:s}
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+hvor
+\begin_inset Formula 
+\begin{equation}
+V_{jt}^{*}\equiv\zeta w_{jt}L_{jt}\label{eq:V_star}
+\end{equation}
+
+\end_inset
+
+Virksomheden ønsker at opbygge reserver svarende til (
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:V_star"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+).
+ Parameteren 
+\begin_inset Formula $\zeta$
+\end_inset
+
+ er det antal perioder virksomheden kan betale løn uden at have indtægter
+ (idet vi ser bort fra renteeffekten).
 \end_layout
 
 \begin_layout Standard
