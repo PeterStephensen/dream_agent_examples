@@ -23,11 +23,11 @@ class Household(Agent):
 
     def event_proc(self, id_event):
         if id_event == Event.START: 
-            Settings.number_of_firms
             return
 
         elif id_event == Event.PERIOD_START: 
             if exist(self._firm):
+                self._wage_last_period = self._wage                    
                 self._wage = self._firm.wage
             return
 
@@ -56,8 +56,8 @@ class Household(Agent):
                                 self._firm.communicate(ECommunication.I_QUIT, self)
                             self._firm = new_firm
             
-            if exist(self._firm): # Remember wage
-                self._wage_last_period = self._firm.wage                 
+            # if exist(self._firm): # Remember wage
+            #     self._wage_last_period = self._firm.wage                 
             
             return
 

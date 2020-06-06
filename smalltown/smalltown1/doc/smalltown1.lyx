@@ -319,7 +319,7 @@ Virksomheden vælger sin opsparing ud fra en buffer-stock-tankegang:
 \begin{equation}
 s_{jt}=\begin{cases}
 \pi_{jt} & \text{for }\pi_{jt}<0\\
-\text{min}\left\{ \pi_{jt},\gamma\left(V_{jt}^{*}-V_{j,t-1}\right)\right\}  & \text{for }\pi_{jt}\geq0
+\text{min}\left\{ \pi_{jt},\gamma\left(V_{jt}^{*}-V_{j,t-1}\right)-r_{t}V_{j,t-1}\right\}  & \text{for }\pi_{jt}\geq0
 \end{cases}\label{eq:s}
 \end{equation}
 
@@ -348,12 +348,46 @@ noprefix "false"
 \end_inset
 
 ).
- Parameteren 
+ Virksomheden ønsker at kunne betale lønninger i 
 \begin_inset Formula $\zeta$
 \end_inset
 
- er det antal perioder virksomheden kan betale løn uden at have indtægter
- (idet vi ser bort fra renteeffekten).
+ perioder uden indtægter.
+ Hvis profitten er negativ gælder det at 
+\begin_inset Formula $s_{jt}=\pi_{jt}.$
+\end_inset
+
+ Virksomheden har ikke anden mulighed end at tære på sine reserver.
+ Hvis profitten er positiv, men ikke stor nok til at tilfredsstille buffer-stock
+-reglen (
+\begin_inset Formula $\pi_{jt}<\gamma\left(V_{jt}^{*}-V_{j,t-1}\right)-r_{t}V_{j,t-1}$
+\end_inset
+
+) opspares hele profitten.
+ Hvis profitten er højere end hvad der kræves af buffer-stock-regelen, trækkes
+ der ren profit ud af virksomheden, svarende til
+\begin_inset Formula 
+\[
+d_{jt}=\pi_{jt}-\gamma\left(V_{jt}^{*}-V_{j,t-1}\right)+r_{t}V_{j,t-1}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Det er vist i appendiks A at (
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:s"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+) rent faktisk er en buffer-stock-mekanisme.
 \end_layout
 
 \begin_layout Standard
@@ -517,6 +551,100 @@ Hvis
 
  ud fra erfaringer der deles mellem virksomhederne.
  
+\end_layout
+
+\begin_layout Standard
+\begin_inset Newpage newpage
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section*
+Appendix A
+\end_layout
+
+\begin_layout Standard
+Suppose a firm has the budget constraint:
+\begin_inset Formula 
+\begin{equation}
+V_{t}=\left(1+r_{t}\right)V_{t-1}+s_{t}\label{eq:A_V}
+\end{equation}
+
+\end_inset
+
+We want to specify the savings 
+\begin_inset Formula $s_{t}$
+\end_inset
+
+ so that the reserves 
+\begin_inset Formula $V_{t}$
+\end_inset
+
+ converge against a given buffer stock 
+\begin_inset Formula $V^{*}.$
+\end_inset
+
+ We would like to choose 
+\begin_inset Formula $s_{t}$
+\end_inset
+
+ so that 
+\begin_inset Formula 
+\begin{equation}
+V_{t}-V^{*}=\gamma\left(V_{t-1}-V^{*}\right),\,\gamma<1,\label{eq:A_V2}
+\end{equation}
+
+\end_inset
+
+as this obviously leads to convergence.
+ We can rewrite (
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:A_V2"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+) to:
+\begin_inset Formula 
+\[
+V_{t}=\left(1+r_{t}\right)V_{t-1}+\left[\gamma\left(V_{t-1}-V^{*}\right)+V^{*}-\left(1+r_{t}\right)V_{t-1}\right]
+\]
+
+\end_inset
+
+such that from (
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:A_V"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+):
+\begin_inset Formula 
+\begin{align*}
+s_{t} & =\gamma\left(V_{t-1}-V^{*}\right)+V^{*}-\left(1+r_{t}\right)V_{t-1}\\
+ & =\left(1-\gamma\right)\left(V^{*}-V_{t-1}\right)-r_{t}V_{t-1}\\
+ & =\phi\left(V^{*}-V_{t-1}\right)-r_{t}V_{t-1}
+\end{align*}
+
+\end_inset
+
+where
+\begin_inset Formula 
+\[
+\phi=1-\gamma<1
+\]
+
+\end_inset
+
+
 \end_layout
 
 \end_body
