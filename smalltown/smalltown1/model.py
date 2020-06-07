@@ -179,7 +179,7 @@ class Firm(Agent):
             if Simulation.time>200:
                 zz=22
 
-            L_opt = self.calculate_optimal_employment(w_bar)
+            L_opt = self.calculate_optimal_employment(self._wage)
             L = len(self._employees)
 
             self._vacancies=0
