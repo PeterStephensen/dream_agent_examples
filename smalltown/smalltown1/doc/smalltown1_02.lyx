@@ -1,0 +1,507 @@
+#LyX 2.3 created this file. For more info see http://www.lyx.org/
+\lyxformat 544
+\begin_document
+\begin_header
+\save_transient_properties true
+\origin unavailable
+\textclass article
+\use_default_options true
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman "times" "default"
+\font_sans "default" "default"
+\font_typewriter "default" "default"
+\font_math "auto" "auto"
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100 100
+\font_tt_scale 100 100
+\use_microtype false
+\use_dash_ligatures true
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\spacing single
+\use_hyperref false
+\papersize default
+\use_geometry false
+\use_package amsmath 1
+\use_package amssymb 1
+\use_package cancel 1
+\use_package esint 1
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 1
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 1
+\use_minted 0
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\is_math_indent 0
+\math_numbering_side default
+\quotes_style english
+\dynamic_quotes 0
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Title
+Wage determination in Smalltown: Modelling the market mechanism
+\end_layout
+
+\begin_layout Author
+Peter Stephensen, DREAM (Version 0.2)
+\end_layout
+
+\begin_layout Standard
+Agentbaseret...
+\end_layout
+
+\begin_layout Section
+Husholdningerne
+\end_layout
+
+\begin_layout Standard
+Husholdningernes centrale opgave i modellen er at udbyde arbejdskraft og
+ modtage løn.
+ Lønnen brugers til at købe varer der typisk er produceret udenfor byen
+ og eventuel opsparing sættes i ikke-lokale aktiver.
+ Husholdningen antages at bestå af en person.
+ 
+\end_layout
+
+\begin_layout Standard
+Hvis husholdningen er arbejdsløs igangsættes en søgeproces.
+ Et givent antal tilfældige virksomheder kontaktes.
+ Bland de virksomheder der har ledige stillinger vælges den der tilbyder
+ den højeste løn.
+ Bemærk at husholdningen søger blandt alle virksomheder - ikke kun dem der
+ har ledige stillinger.
+ Dette er en simpel (og ikke helt realistisk) søge-teknologi med flere gode
+ egenskaber.
+ Den er nem at implementere og sandsynligheden for at få et job kommer halt
+ automatisk til at afhænge af hvor mange virksomheder der efterspørger arbejdskr
+aft.
+ 
+\end_layout
+
+\begin_layout Standard
+Når husholdningen er beskæftiget vil den også af og til igangsætte en søgeproces.
+ Dette sker med en bestemt lav attention focus sandsynlighed og hvis virksomhede
+n husholdningen er ansat i sætter lønnen ned.
+ 
+\end_layout
+
+\begin_layout Section
+Virksomhederne
+\end_layout
+
+\begin_layout Standard
+Den enkelte virksomhed har en S-formet produktionsfunktion, således at der
+ er stigende skalaafkast i starten men aftagende skalaafkast ved høj produktion:
+\begin_inset Formula 
+\begin{equation}
+Y_{jt}=\begin{cases}
+\theta_{jt}\left(L_{jt}-L^{\text{min}}\right)^{\alpha} & \text{for }L_{jt}\geq L^{\text{min}}\\
+0 & \text{\text{for }\ensuremath{L_{jt}\ensuremath{<}L^{\text{min}}}}
+\end{cases}\label{eq:Yjt}
+\end{equation}
+
+\end_inset
+
+Dette betyder at den enkelte virksomhed har en optimal størrelse.
+ 
+\end_layout
+
+\begin_layout Standard
+Virksomheden sælger til et internationalt marked med en eksogene pris pris
+ 
+\begin_inset Formula $\overline{p}_{t}$
+\end_inset
+
+.
+ Profitten er derfor givet ved:
+\begin_inset Formula 
+\begin{equation}
+\pi_{jt}=\overline{p}_{t}Y_{jt}-w_{jt}L_{jt},\label{eq:profit_jt}
+\end{equation}
+
+\end_inset
+
+hvor 
+\begin_inset Formula $w_{jt}$
+\end_inset
+
+ er lønnen.
+ 
+\end_layout
+
+\begin_layout Standard
+Beskæftigelsen skal repræsenteres af et heltal og vi kan derfor ikke anvende
+ kortinuert matematik.
+ Virksomheden indsætter værdier 
+\begin_inset Formula $L=L^{\text{min}},L^{\text{min}}+1,..$
+\end_inset
+
+ i (
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:Yjt"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+) og (
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:profit_jt"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+) indtil den finder den profitmaksimerende beskæftigelse.
+ Lad 
+\begin_inset Formula $\hat{L}_{jt}\left(w_{jt}\right)$
+\end_inset
+
+ være løsningen på dette problem ved lønnen 
+\begin_inset Formula $w_{jt}$
+\end_inset
+
+ og lad 
+\begin_inset Formula $\hat{\pi}_{jt}\left(w_{jt}\right)$
+\end_inset
+
+ være profitten i denne løsning.
+\end_layout
+
+\begin_layout Standard
+Virksomhederne må hele tiden reagere på makro-stød til 
+\begin_inset Formula $\overline{p}_{t}$
+\end_inset
+
+ og mikro-stød til 
+\begin_inset Formula $\theta_{jt}$
+\end_inset
+
+.
+ Virksomheden bestemmer selv lønnen 
+\begin_inset Formula $w_{jt}.$
+\end_inset
+
+ Vi antager at virksomheden forstår at hvis den sætter lønne lavere end
+ gennemsnitslønnen vil den miste medarbejdre og hvis den sætter lønnen højere
+ end gennemsnitslønnen vil den få flere ansøgninger.
+\end_layout
+
+\begin_layout Standard
+Vi antager at virksomheden har et estimat for gennemsnitslønnen 
+\begin_inset Formula $\overline{w}_{t}$
+\end_inset
+
+.
+ Dette er en central social antagelse om at der flyder aggregeret data fra
+ markedet til den enkelte agent.
+ Man kan forestille sig at virksomheden selv samler data for at estimere
+ 
+\begin_inset Formula $\overline{w}_{t}$
+\end_inset
+
+ eller at der er en central instans der står for estimatet.
+ Vi antager det sidste.
+\end_layout
+
+\begin_layout Standard
+Hvis det gælder at 
+\begin_inset Formula $\hat{\pi}_{jt}\left(\overline{w}_{t}\right)>0$
+\end_inset
+
+ betyder det at virksomheden kan tjene penge ved den gældende markedsløn.
+ Hvis omvendt 
+\begin_inset Formula $\hat{\pi}_{jt}\left(\overline{w}_{t}\right)<0$
+\end_inset
+
+ har virksomheden for lav produktivitet til at tjene penge i det gældende
+ marked.
+ Hvis virksomheden har underskud antager vi at den vælger den beskæftigelse
+ der giver det mindste underskud.
+ 
+\end_layout
+
+\begin_layout Standard
+Vi antager at virksomheden sætter lønnen efter følgende regel: 
+\begin_inset Formula 
+\begin{align*}
+w_{jt} & =\begin{cases}
+\left(1+m_{j}^{\text{up}}\right)\overline{w}_{t} & \text{for }\hat{L}_{jt}\left(\overline{w}_{t}\right)>L_{j,t-1}\\
+\overline{w}_{t} & \text{for }\hat{L}_{jt}\left(\overline{w}_{t}\right)=L_{j,t-1}\\
+\frac{\overline{w}_{t}}{1+m_{j}^{\text{down}}} & \text{for }\hat{L}_{jt}\left(\overline{w}_{t}\right)<L_{j,t-1}
+\end{cases}\\
+\end{align*}
+
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+Hvis 
+\begin_inset Formula $\hat{L}_{jt}>L_{j,t-1}$
+\end_inset
+
+ slåes 
+\begin_inset Formula $V_{jt}=\hat{L}_{jt}-L_{j,t-1}$
+\end_inset
+
+ stillinger op.
+ Hvis 
+\begin_inset Formula $\hat{L}_{jt}<L_{j,t-1}$
+\end_inset
+
+ fyres 
+\begin_inset Formula $F_{jt}=\varphi\left(L_{j,t-1}-\hat{L}_{jt}\right)$
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Standard
+Virksomheden har en dynamisk budgetrestriktion:
+\begin_inset Formula 
+\[
+V_{jt}=\left(1+r_{t}\right)V_{j,t-1}+s_{jt},\,V_{j0}=0
+\]
+
+\end_inset
+
+hvor 
+\begin_inset Formula $s_{jt}$
+\end_inset
+
+ er virksomhedens opsparing og 
+\begin_inset Formula $V_{jt}$
+\end_inset
+
+ er reserver.
+ Virksomheden starter uden reserver og har en kredit-grænse 
+\begin_inset Formula $C^{\text{limit}}<0.$
+\end_inset
+
+ Hvis 
+\begin_inset Formula $V_{jt}<C^{\text{limit}}$
+\end_inset
+
+ går virksomheden fallit.
+ Når virksomheden går fallit forsvinder den og alle medarbejdere fyres.
+\end_layout
+
+\begin_layout Standard
+Virksomheden vælger sin opsparing ud fra en buffer-stock-tankegang:
+\begin_inset Formula 
+\begin{equation}
+s_{jt}=\begin{cases}
+\pi_{jt} & \text{for }\pi_{jt}<0\\
+\text{min}\left\{ \pi_{jt},\gamma\left(V_{jt}^{*}-V_{j,t-1}\right)-r_{t}V_{j,t-1}\right\}  & \text{for }\pi_{jt}\geq0
+\end{cases}\label{eq:s}
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+hvor
+\begin_inset Formula 
+\begin{equation}
+V_{jt}^{*}\equiv\zeta w_{jt}L_{jt}\label{eq:V_star}
+\end{equation}
+
+\end_inset
+
+Virksomheden ønsker at opbygge reserver svarende til (
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:V_star"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+).
+ Virksomheden ønsker at kunne betale lønninger i 
+\begin_inset Formula $\zeta$
+\end_inset
+
+ perioder uden indtægter.
+ Hvis profitten er negativ gælder det at 
+\begin_inset Formula $s_{jt}=\pi_{jt}.$
+\end_inset
+
+ Virksomheden har ikke anden mulighed end at tære på sine reserver.
+ Hvis profitten er positiv, men ikke stor nok til at tilfredsstille buffer-stock
+-reglen (
+\begin_inset Formula $\pi_{jt}<\gamma\left(V_{jt}^{*}-V_{j,t-1}\right)-r_{t}V_{j,t-1}$
+\end_inset
+
+) opspares hele profitten.
+ Hvis profitten er højere end hvad der kræves af buffer-stock-regelen, trækkes
+ der ren profit ud af virksomheden, svarende til
+\begin_inset Formula 
+\[
+d_{jt}=\pi_{jt}-\gamma\left(V_{jt}^{*}-V_{j,t-1}\right)+r_{t}V_{j,t-1}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Det er vist i appendiks A at (
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:s"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+) rent faktisk er en buffer-stock-mekanisme.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Newpage newpage
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section*
+Appendix A
+\end_layout
+
+\begin_layout Standard
+Suppose a firm has the budget constraint:
+\begin_inset Formula 
+\begin{equation}
+V_{t}=\left(1+r_{t}\right)V_{t-1}+s_{t}\label{eq:A_V}
+\end{equation}
+
+\end_inset
+
+We want to specify the savings 
+\begin_inset Formula $s_{t}$
+\end_inset
+
+ so that the reserves 
+\begin_inset Formula $V_{t}$
+\end_inset
+
+ converge against a given buffer stock 
+\begin_inset Formula $V^{*}.$
+\end_inset
+
+ We would like to choose 
+\begin_inset Formula $s_{t}$
+\end_inset
+
+ so that 
+\begin_inset Formula 
+\begin{equation}
+V_{t}-V^{*}=\gamma\left(V_{t-1}-V^{*}\right),\,\gamma<1,\label{eq:A_V2}
+\end{equation}
+
+\end_inset
+
+as this obviously leads to convergence.
+ We can rewrite (
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:A_V2"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+) to:
+\begin_inset Formula 
+\[
+V_{t}=\left(1+r_{t}\right)V_{t-1}+\left[\gamma\left(V_{t-1}-V^{*}\right)+V^{*}-\left(1+r_{t}\right)V_{t-1}\right]
+\]
+
+\end_inset
+
+such that from (
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:A_V"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+):
+\begin_inset Formula 
+\begin{align*}
+s_{t} & =\gamma\left(V_{t-1}-V^{*}\right)+V^{*}-\left(1+r_{t}\right)V_{t-1}\\
+ & =\left(1-\gamma\right)\left(V^{*}-V_{t-1}\right)-r_{t}V_{t-1}\\
+ & =\phi\left(V^{*}-V_{t-1}\right)-r_{t}V_{t-1}
+\end{align*}
+
+\end_inset
+
+where
+\begin_inset Formula 
+\[
+\phi=1-\gamma<1
+\]
+
+\end_inset
+
+
+\end_layout
+
+\end_body
+\end_document
