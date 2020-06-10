@@ -1,6 +1,9 @@
 {
     "python.autoComplete.extraPaths": [
         "C:\\Users\\b007566\\Dropbox\\python\\my_repos\\dream_agent_examples",
-        "C:\\Users\\b007566\\Dropbox\\python\\my_repos\\dream_agent_examples\\smalltown\\smalltown1"],
+        // "C:\\Users\\b007566\\Dropbox\\python\\my_repos\\dream_agent_examples\\smalltown\\smalltown1",
+        // "C:\\Users\\b007566\\Dropbox\\python\\my_repos\\dream_agent_examples\\Schelling\\Schelling",
+        "C:\\Users\\b007566\\Dropbox\\python\\my_repos\\dream_agent_examples\\Schelling\\Schelling_network"
+    ],
     "python.linting.enabled": true
 }

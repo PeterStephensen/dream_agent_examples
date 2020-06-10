@@ -1,8 +1,7 @@
 import random
 
 class Agent:
-    """Class used for agent based modelling and microsimulation
-    """
+    """Class used for agent based modelling and microsimulation by DREAM (www.dreamgruppen.dk)."""
     _nAgents = 0
 
     def __init__(self, parent=None):
@@ -11,7 +10,6 @@ class Agent:
         Keyword Arguments:
             parent {Agent} -- The parent object (default: {None})
         """
-
         self._id = Agent._nAgents
         Agent._nAgents += 1
         self._first, self._next = None, None
@@ -21,7 +19,8 @@ class Agent:
         self.removed, self.remove_when_empty = False, False
         self._random_agent=None
         
-        if parent != None: parent.add_agent(self)
+        if parent is not None: 
+            parent.add_agent(self)
 
     def event_proc(self, id_event):
         """This method describes the behavior of the agent
@@ -41,6 +40,9 @@ class Agent:
         Arguments:
             a {Agent} -- The new child agent
         """
+        if not isinstance(a, Agent):
+            raise SystemExit('Error: Argument a in add_agent should be Agent.')
+        
         # Release old relations
         a.remove_this_agent()
 
@@ -48,7 +50,7 @@ class Agent:
         a._prev, a._next = self._last, None
         a._parent = self
     
-        if self._first == None:
+        if self._first is None:
             self._first = a
         else:
             self._last._next = a
@@ -63,13 +65,16 @@ class Agent:
         Arguments:
             a {Agent} -- The child agent that should be removed
         """
+        if not isinstance(a, Agent):
+            raise SystemExit('Error: Argument a in remove_agent should be Agent.')
+
         self.removed = True
 
         if self._count==1:
             self._first, self._last = None, None
         else:
-            if a._prev != None: a._prev._next = a._next
-            if a._next != None: a._next._prev = a._prev
+            if a._prev is not None: a._prev._next = a._next
+            if a._next is not None: a._next._prev = a._prev
             
             if a == self._first: self._first = a._next
             if a == self._last: self._last = a._prev
@@ -98,6 +103,47 @@ class Agent:
                     lst[i]._prev, lst[i]._next = lst[i-1], lst[i+1]
 
 
+    def get_random_agents(self, not_this_agent=None, n=1):
+        """Generates a list of random child agents
+
+        Keyword Arguments:
+            not_this_agent {Agent} -- An agent not to return. Will often be 'this'.  (default: {None})
+            n {int} -- Number of agents to return. If the number of agents is less than n, all agents are returned.  (default: {1})
+
+        Returns:
+            Agent -- A list of random agents. Returns None if no children
+        """
+        
+        if (not (not_this_agent is None)) and (not isinstance(not_this_agent, bool)):
+            raise SystemExit('Error: Argument not_this_agent in get_random_agent should be None or bool.')
+
+        if not isinstance(n, int):
+            raise SystemExit('Error: Argument n in get_random_agent should be int.')
+        
+        # If no children: end here
+        if self._first is None:    
+            return None
+
+        # If _random_agent not initialized: initialize
+        if self._random_agent == None:  
+            self._random_agent = self._first
+
+        # Generate the return-list
+        ls = [None]*n
+        i = 0
+        while i < n:
+            if self._random_agent != not_this_agent:  # or (not_this_agent is None)
+                ls[i] = self._random_agent
+                i += 1
+
+            if self._random_agent._next is not None:
+                self._random_agent = self._random_agent._next
+            else:
+                self._random_agent = self._first
+       
+        return ls
+
+
     def get_random_agent(self, not_this_agent=None, n=1):
         """A random child agent is returned
 
@@ -108,30 +154,18 @@ class Agent:
         Returns:
             Agent -- A random agent or a list of agents. Returns None if no children
         """
-        # If no children
-        if self._first == None:
+        if (not (not_this_agent is None)) and (not isinstance(not_this_agent, bool)):
+            raise SystemExit('Error: Argument not_this_agent in get_random_agent should be None or bool.')
+
+        if not isinstance(n, int):
+            raise SystemExit('Error: Argument n in get_random_agent should be int.')
+        
+        ls = self.get_random_agents(not_this_agent=not_this_agent, n=n)
+
+        if ls==None:
             return None
 
-        if self._random_agent == None:
-            self._random_agent = self._first
-
-        nn = n  #0.3
-        if n > self._count:
-            nn = self._count
-
-        ls = []
-        i = 0
-
-        while (i < nn):
-            if self._random_agent != not_this_agent or not_this_agent==None:
-                ls.append(self._random_agent)
-                i += 1
-            if self._random_agent._next != None:
-                self._random_agent = self._random_agent._next
-            else:
-                self._random_agent = self._first
-
-        if nn == 1:
+        if len(ls) == 1:
             return ls[0]
         else:
             return ls
@@ -203,4 +237,6 @@ class Agent:
             int -- The total number of agents in the current simulation
         """
         return Agent._nAgents
+
+
 
