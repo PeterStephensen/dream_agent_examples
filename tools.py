@@ -18,7 +18,7 @@ def table(x):
 
 # Usefull function
 def exist(x):
-    """Tests whether an object is allocated
+    """Tests whether an object is allocated (is not None)
 
     Args:
         x (object): Any object
