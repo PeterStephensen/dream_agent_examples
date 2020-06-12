@@ -5,12 +5,11 @@ from datetime import datetime
 import os
 import time
 
-from dream_agent import Agent
+from dream_agent import *
 
-from enums import Event, ECommunication   
-from settings import Settings
-from plots import graphics_init
-from plots import plot1, plot2
+from .enums import *   
+from .settings import *
+from .plots import *
 
 # The Person object
 #---------------------------

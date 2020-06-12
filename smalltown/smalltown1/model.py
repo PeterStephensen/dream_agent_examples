@@ -6,11 +6,11 @@ import os
 import time
 
 from dream_agent import *
-
-from enums import *   
-from plots import *
-from settings import *
 from tools import exist
+
+from .enums import *   
+from .plots import *
+from .settings import *
 
 
 class Household(Agent):

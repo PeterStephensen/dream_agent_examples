@@ -1,6 +1,8 @@
-from dream_agent import Agent
-from enum import Enum
 import random
+from enum import Enum
+
+from dream_agent import Agent
+
 
 # Events
 #---------------------------

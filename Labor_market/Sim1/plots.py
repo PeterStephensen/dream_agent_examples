@@ -2,8 +2,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 from collections import Counter
 
-from settings import Settings
-from dream_agent import local_mean
+from .settings import Settings
+from tools import local_mean
 
 # Usefull table function
 def table(x):

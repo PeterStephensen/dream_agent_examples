@@ -1,7 +1,3 @@
-# Peter Stephensen, DREAM 2019
-import sys, os
-sys.path.append(os.getcwd()) # Add root-dir to sys.path
-
 from dream_agent import Agent
 #----------------------------------------------------------------
 # In this tutorial we will learn:

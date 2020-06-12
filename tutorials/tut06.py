@@ -1,14 +1,11 @@
-# Peter Stephensen, DREAM 2019
-import sys, os
-sys.path.append(os.getcwd()) # Add root-dir to sys.path
-
-from dream_agent import Agent
-
 import random
 import math
 import matplotlib.pyplot as plt
 import numpy as np
 from enum import Enum
+
+from dream_agent import Agent
+
 #----------------------------------------------------------------
 # In this tutorial we add agent interaction: You will learn:
 # 1) How an agent do a random search
@@ -35,7 +32,16 @@ class Event(Enum):
 
 # The Settings object
 #---------------------------
-class Settings: pass
+class Settings(): 
+    number_of_agents = 1000
+    number_of_periods = 10000
+    out_file = "test.txt"
+
+    graphics_show = True
+    graphics_periods_per_pic = 15
+
+    loot_share = 0.25 # If you win, this is the share of the others wealth you get
+    attack_probability = 0.1
 
 # The Person object
 #---------------------------
@@ -172,15 +178,6 @@ class Simulation(Agent):
 
 # We can now run the model
 #--------------------------
-Settings.number_of_agents = 1000
-Settings.number_of_periods = 10000
-Settings.out_file = "test.txt"
-
-Settings.graphics_show = True
-Settings.graphics_periods_per_pic = 15
-
-Settings.loot_share = 0.25 # If you win, this is the share of the others wealth you get
-Settings.attack_probability = 0.1
 
 Simulation()
 

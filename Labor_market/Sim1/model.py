@@ -5,12 +5,11 @@ from datetime import datetime
 import os
 
 from dream_agent import Agent
-from dream_agent import local_mean
+from tools import local_mean
 
-from enums import Event, ECommunication   
-from settings import Settings
-from plots import graphics_init
-from plots import plot1, plot2, plot3, plot4, plot5, plot6, plot7, plot8
+from .enums import *   
+from .settings import *
+from .plots import *
 
 
 # The Worker object

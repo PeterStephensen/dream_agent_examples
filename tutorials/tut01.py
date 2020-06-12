@@ -1,10 +1,6 @@
-# Peter Stephensen, DREAM 2019
 #-------------------------------------------------------------------
 # In this first tutorial we will play around with the Agent object
 #-------------------------------------------------------------------
-import sys, os
-sys.path.append(os.getcwd()) # Add root-dir to sys.path
-
 # We need to import the implementation of Agent
 from dream_agent import Agent
 

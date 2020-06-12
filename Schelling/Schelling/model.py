@@ -5,9 +5,9 @@ import os
 
 from dream_agent import *
 
-from enums import *
-from settings import *
-from plots import *
+from .enums import *
+from .settings import *
+from .plots import *
 
 #---------------------------
 

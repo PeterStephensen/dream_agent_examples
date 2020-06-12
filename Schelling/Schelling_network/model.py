@@ -5,9 +5,10 @@ import os
 
 from dream_agent import *
 
-from enums import *
-from settings import *
-from plots import *
+# from Schelling.Schelling_network.enums import *
+from .enums import *
+from .settings import *
+from .plots import *
 
 #---------------------------
 
@@ -163,6 +164,8 @@ class Simulation(Agent):
 
 # We can now run the model
 #--------------------------
+print("------------------------------")
+print(__package__)
 
 Simulation()
 

@@ -1,9 +1,7 @@
-# Peter Stephensen, DREAM 2019
-import sys, os
-sys.path.append(os.getcwd()) # Add root-dir to sys.path
+import random
+from enum import Enum
 
 from dream_agent import Agent
-import random
 
 #----------------------------------------------------------------
 # In this tutorial we add a Statistics object to the model
@@ -12,11 +10,11 @@ import random
 #----------------------------------------------------------------
 
 # We start by defining the 'events' of the model:
-class Event: pass
-Event.start = 1         # The model starts
-Event.stop = 2          # The model stops
-Event.period_start = 3  # The start of a period
-Event.update = 4        # Stuff that happens in the periode
+class Event(Enum): 
+    START = 1         # The model starts
+    STOP = 2          # The model stops
+    PERIOD_START = 3  # The start of a period
+    UPDATE = 4        # Stuff that happens in the periode
 
 # Stock-flow-considerations
 #---------------------------
@@ -28,12 +26,12 @@ Event.update = 4        # Stuff that happens in the periode
 
 # The Settings object
 #---------------------------
-class Settings: pass
-Settings.number_of_agents = 0
-Settings.number_of_periods = 0
-Settings.probability_of_death = -1
-Settings.number_of_new_born=0
-Settings.out_file=""
+class Settings():
+    number_of_agents = 0
+    number_of_periods = 0
+    probability_of_death = -1
+    number_of_new_born=0
+    out_file=""
 
 # The Person object
 #---------------------------
@@ -44,7 +42,7 @@ class Person(Agent):
         self._age = 0
 
     def event_proc(self, id_event):
-        if id_event == Event.update:
+        if id_event == Event.UPDATE:
             self._age += 1
             if random.random() < Settings.probability_of_death:
                 self.remove_this_agent()
@@ -63,13 +61,13 @@ class Person(Agent):
 class Statistics(Agent):
 
     def event_proc(self, id_event):
-        if id_event == Event.start:                     #1
+        if id_event == Event.START:                     #1
             self._file = open(Settings.out_file, "w")
 
-        elif id_event == Event.stop:                    #2
+        elif id_event == Event.STOP:                    #2
             self._file.close()
 
-        elif id_event == Event.period_start:            #3
+        elif id_event == Event.PERIOD_START:            #3
             print(Simulation.population.get_number_of_agents())
             self._file.write("{}\t{}\n".format(Simulation.time, Simulation.population.get_number_of_agents()))
 
@@ -101,23 +99,23 @@ class Simulation(Agent):
             Person(Simulation.population)
 
         # Start the simulation
-        self.event_proc(Event.start)
+        self.event_proc(Event.START)
 
     def event_proc(self, id_event):
-        if id_event == Event.start:
+        if id_event == Event.START:
             # Send Event.start down the tree to all decendants
             super().event_proc(id_event)
 
             # The Event Pump: the actual simulation   #2
             while Simulation.time < Settings.number_of_periods:
-                self.event_proc(Event.period_start)
-                self.event_proc(Event.update)
+                self.event_proc(Event.PERIOD_START)
+                self.event_proc(Event.UPDATE)
                 Simulation.time += 1
 
             # Stop the simulation
-            self.event_proc(Event.stop)
+            self.event_proc(Event.STOP)
 
-        elif id_event == Event.update:
+        elif id_event == Event.UPDATE:
             # Adding new born persons to the population
             for i in range(Settings.number_of_new_born):
                 Person(Simulation.population)

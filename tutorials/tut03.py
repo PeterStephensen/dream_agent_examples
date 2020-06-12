@@ -1,9 +1,7 @@
-# Peter Stephensen, DREAM 2019
-import sys, os
-sys.path.append(os.getcwd()) # Add root-dir to sys.path
+import random
+from enum import Enum
 
 from dream_agent import Agent
-import random
 
 #----------------------------------------------------------------
 # In this tutorial we make the first full model. It will be a simple demographic microsimulation model.
@@ -17,10 +15,10 @@ import random
 #--------------------------------------------------
 # We start by defining the 'events' of the model:
 #--------------------------------------------------
-class Event: pass
-Event.start = 1         # The model starts
-Event.stop = 2          # The model stops
-Event.update = 3        # Agent behavior
+class Event(Enum):
+    START = 1         # The model starts
+    STOP = 2          # The model stops
+    UPDATE = 3        # Agent behavior
 
 # All agents will receive these events and can react on them.
 # On Event.update the agent should express its behavior (consume, produce, look for work, die ect.)
@@ -30,11 +28,11 @@ Event.update = 3        # Agent behavior
 #--------------------------------------------------
 # The Settings-object contains all informations that the user should supply
 # All elements should be given a default value.
-class Settings: pass
-Settings.number_of_agents=0
-Settings.number_of_periods=0
-Settings.probability_of_death=0
-Settings.number_of_new_born=0
+class Settings():
+    number_of_agents=0
+    number_of_periods=0
+    probability_of_death=0
+    number_of_new_born=0
 
 #--------------------------------------------------
 # The Person-object
@@ -54,7 +52,7 @@ class Person(Agent):
         self._age = 0                                           #1
 
     def event_proc(self, id_event):
-        if id_event == Event.update:                            #2
+        if id_event == Event.UPDATE:                            #2
             self._age += 1                                      #3
             if random.random() < Settings.probability_of_death:
                 self.remove_this_agent()                        #4
@@ -104,24 +102,24 @@ class Simulation(Agent):
             Person(Simulation.population)
 
         # Start the simulation
-        self.event_proc(Event.start)                     #5
+        self.event_proc(Event.START)                     #5
 
     def event_proc(self, id_event):
-        if id_event == Event.start:                      #6
+        if id_event == Event.START:                      #6
             # Send Event.start down the tree to all decendants
             super().event_proc(id_event)                 #7
 
             # The Event Pump: the actual simulation      #8
             while Simulation.time < Settings.number_of_periods:
-                self.event_proc(Event.update)
+                self.event_proc(Event.UPDATE)
                 Simulation.time += 1
                 print(Simulation.population.get_number_of_agents())
 
             # Stop the simulation
-            self.event_proc(Event.stop)                  #9
+            self.event_proc(Event.STOP)                  #9
 
 
-        elif id_event == Event.update:                   #10
+        elif id_event == Event.UPDATE:                   #10
             # Adding new born persons to the population
             for i in range(Settings.number_of_new_born):
                 Person(Simulation.population)

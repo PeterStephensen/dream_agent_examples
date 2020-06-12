@@ -1,6 +1,8 @@
 import matplotlib.pyplot as plt
-from settings import Settings
+
 from tools import table
+
+from .settings import Settings
 
 PLOT_ROW = 2
 PLOT_COL = 6
